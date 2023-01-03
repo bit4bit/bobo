@@ -13,5 +13,7 @@ crystal: 1.6.2
 dependencies:
   tox:
     path: ../tox.cr
-
+  kemal:
+        github: kemalcr/kemal
+        
 license: MIT

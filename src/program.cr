@@ -2,7 +2,11 @@ require "http/server"
 require "option_parser"
 require "dir"
 
+require "kemal"
+
 require "./bobo"
+
+
 
 quiet = false
 command = nil
@@ -30,39 +34,41 @@ OptionParser.parse do |parser|
   end
 end.parse
 
+provider = Bobo::Provider.new()
+provider.start()
+
+if quiet
+  logging false
+end
+
+
 case command
 when :programmer
   raise "requires mob-id" if mob_id.nil?
-  programmer = Bobo::Programmer.connect(mob_id.as(String), mob_directory)
+  programmer = Bobo::Programmer.connect(mob_id.as(String), mob_directory, provider: provider)
 
-  server = HTTP::Server.new do |context|
-    case context.request.path
-    when "/mobid"
-      context.response.content_type = "text/plain"
-      context.response.print programmer.mob_id
-    end
+  get "/mobid" do
+    programmer.mob_id
   end
 
-  if !quiet
-    puts "Programmer listening on http://127.0.0.1:#{http_port}"
-    puts "Programmer directory #{mob_directory}"
+  post "/drive" do |env|
+    halt env, status_code: 503, response: "can't drive file example.rb mismatch content"
   end
-
-  server.listen(http_port)
 when :mobstart
-  mob = Bobo::Mob.new()
+  mob = Bobo::Mob.new(provider)
   mob.start(mob_directory)
 
-  server = HTTP::Server.new do |context|
-    if context.request.path == "/id"
-      context.response.content_type = "text/plain"
-      context.response.print mob.id
-    end
+  get "/id" do
+    mob.id
   end
 
-  if !quiet
-    puts "MOB Listening on http://127.0.0.1:#{http_port}"
-    puts "MOB directory #{mob_directory}"
-  end
-  server.listen(http_port)
+
+end
+
+if !quiet
+  puts "MOB directory #{mob_directory}"
+end
+
+Kemal.run do |config|
+  config.server.not_nil!.bind_tcp http_port
 end
