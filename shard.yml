@@ -1,0 +1,17 @@
+name: bobo
+version: 0.1.0
+
+authors:
+  - Jovany Leandro G.C <bit4bit@riseup.net>
+
+targets:
+  bobo:
+    main: src/program.cr
+
+crystal: 1.6.2
+
+dependencies:
+  tox:
+    path: ../tox.cr
+
+license: MIT

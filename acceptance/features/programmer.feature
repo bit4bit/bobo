@@ -8,4 +8,10 @@ Feature: As Programmer
     And I inside "example"
     When I start mob
     Then I can query mob ID
-    Then I stop mob
+
+  Scenario: connect to active mob
+    Given example source code as "example-mob"
+    And example source code as "example-user"
+    And I inside "example-user"
+    When I start mob
+    Then I can connect to mob started
