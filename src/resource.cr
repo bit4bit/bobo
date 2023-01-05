@@ -1,32 +1,44 @@
 module Bobo
+  alias Resources = Array(Resource)
+
   class Resource
     getter :id
-    getter :programmer
-    getter :content
+    getter :relative_path
+    getter :programmer_id
     getter :hash
 
     def initialize(
          @id : String,
-         @programmer : Programmer,
+         @relative_path : String,
+         @programmer_id : String,
          @hash : String,
-         @content : IO)
+         content : IO)
+      content.seek(0)
+      @content = IO::Memory.new()
+      IO.copy(content, @content)
+      @content.seek(0)
     end
 
-    def programmer_id : String
-      @programmer.id
+    def content
+      @content.dup
     end
 
-    def self.from_file(programmer : Programmer, path : Path)
+    def self.from_file(programmer_id : String, path : Path, relative_path : String)
       if !File.exists?(path)
         raise "not found file #{path}"
       end
+
       content = IO::Memory.new()
       File.open(path, "r") do |f|
         IO.copy(f, content)
       end
 
       hash = digest_file(path)
-      new(path.to_s,programmer, hash, content)
+      new(id: path.to_s,
+          relative_path: relative_path,
+          programmer_id: programmer_id,
+          hash: hash,
+          content: content)
     end
 
     private def self.digest_file(file : String | Path) : String

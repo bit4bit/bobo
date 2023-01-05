@@ -45,9 +45,11 @@ raise "requires mob-url" if mob_url.nil?
 
 gateway = Bobo::Gateway::Programmer.new(programmer_id.not_nil!,
                                         mob_url.not_nil!,
+                                        Log.for("programmer:gateway"),
                                         mob_directory)
 pgapp = Bobo::Application::Programmer.new(
   gateway: gateway,
+  log: Log.for("programmer:application"),
   mob_directory: mob_directory
 )
 
@@ -63,6 +65,13 @@ post "/drive" do |env|
   else
     env.response.status_code = 200
     result.ok
+  end
+end
+
+spawn do
+  loop do
+    pgapp.synchronize_with_mob(mob_id.not_nil!, programmer_id.not_nil!)
+    sleep 1.second
   end
 end
 

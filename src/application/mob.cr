@@ -1,6 +1,5 @@
 module Bobo
   module Application
-
     class Mob
       def initialize(@gateway : Gateway::Mob)
       end

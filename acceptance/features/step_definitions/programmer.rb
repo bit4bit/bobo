@@ -41,7 +41,7 @@ class Mob
   end
 
   def start
-    @mob_pid = Process.spawn({"LOG_LEVEL" => "DEBUG"}, "#{$bin_path.join('bobomob')} test -d #{@mob_directory} -q --port #{@mob_http_port}")
+    @mob_pid = Process.spawn({"LOG_LEVEL" => "INFO"}, "#{$bin_path.join('bobomob')} test -d #{@mob_directory} -q --port #{@mob_http_port}")
   end
 
 
@@ -61,11 +61,10 @@ class Programmer
     @mob_directory = mob_directory
     @mob_http_port = mob_http_port
     @port = HTTPPorts.next
-    
   end
 
   def start(mob_id)
-    @mob_pid = Process.spawn({"LOG_LEVEL" => "DEBUG"}, "#{$bin_path.join('boboprogrammer')} -i #{mob_id} -u #{@id} -d #{@mob_directory} -q --port #{@port} -l http://localhost:#{@mob_http_port}")
+    @mob_pid = Process.spawn({"LOG_LEVEL" => "INFO"}, "#{$bin_path.join('boboprogrammer')} -i #{mob_id} -u #{@id} -d #{@mob_directory} -q --port #{@port} -l http://localhost:#{@mob_http_port}")
   end
 
   def mob_id
@@ -160,5 +159,37 @@ end
 
 Then('drive ok') do
   expect(@result.error?).to be false
+end
+
+
+Then('connect partner {string} in {string}') do |name, project|
+  project_dir = @projects_dir.fetch(project)
+  partner = Programmer.new(name, @mob.mob_http_port, project_dir)
+  partner.start(@mob.id)
+  partner.wait_started()
+
+  @partners ||= {}
+  @partners[name] = partner
+end
+
+Then('partner {string} drive file {string}') do |name, file|
+  partner = @partners.fetch(name)
+  result = partner.drive(file)
+  expect(result.error?).to be false
+end
+
+Then('I wait {int} second') do |int|
+  sleep int
+end
+
+Then('In {string} file {string} expects content {string}') do |project, file, content|
+  project_dir = @projects_dir.fetch(project)
+  Dir.chdir(project_dir) do |path|
+    filename = File.join(path, file)
+    fail("not file #{path} in project #{project}") unless File.exists?(filename)
+    got_content = File.read(filename)
+    
+    expect(got_content).to eq(content)
+  end
 end
 
