@@ -15,6 +15,8 @@ Log.setup_from_env
 quiet = false
 command = nil
 mob_id = nil
+mob_url = nil
+programmer_id = nil
 http_port = 65300
 mob_directory = Dir.current
 
@@ -24,6 +26,8 @@ OptionParser.parse do |parser|
   parser.on("-p PORT", "--port=PORT", "HTTP PORT") { |port| http_port = port.to_i }
   parser.on("-d DIRECTORY", "--mob-directory=DIRECTORY", "MOB DIRECTORY") { |path| mob_directory = path }
   parser.on("-i MOBID", "--mob-id=MOBID", "MOB ID") { |id| mob_id = id }
+  parser.on("-u PROGRAMMERID", "--programmer-id=PROGRAMERID", "MOB ID") { |id| programmer_id = id }
+  parser.on("-l MOBURL", "--mob-url=MOBURL", "MOB URL") { |url| mob_url = url }
   parser.on("-h", "--help", "Show this help") do
     puts parser
     exit
@@ -36,24 +40,14 @@ end
 
 
 raise "requires mob-id" if mob_id.nil?
-toxrpc = Bobo::ToxRpc::Client.new(log: Log.for("toxrpc:programmer"))
-toxrpc.bootstrap()
-spawn name: "toxrpc tox iterate" do
-  loop do
-    toxrpc.iterate()
-  end
-end
-spawn name: "toxrpc runner" do
-    toxrpc.listen()
-end
-toxrpc.connect(Bobo::ToxRpc::Address.new(mob_id.not_nil!))
+raise "requires programmer-id" if programmer_id.nil?
+raise "requires mob-url" if mob_url.nil?
 
-programmer_id = toxrpc.address
-pgprovider = Bobo::ProgrammerProvider.new(programmer_id, mob_directory)
-provider = Bobo::MobProvider::Remote.new(mob_id.not_nil!, mob_directory, toxrpc)
+gateway = Bobo::Gateway::Programmer.new(programmer_id.not_nil!,
+                                        mob_url.not_nil!,
+                                        mob_directory)
 pgapp = Bobo::Application::Programmer.new(
-  mob_provider: provider,
-  programmer_provider: pgprovider,
+  gateway: gateway,
   mob_directory: mob_directory
 )
 
@@ -63,12 +57,13 @@ end
 
 post "/drive" do |env|
   filepath = env.params.body["filepath"].as(String)
-  result = pgapp.drive(mob_id.not_nil!, programmer_id, filepath)
+  result = pgapp.drive(mob_id.not_nil!, programmer_id.not_nil!, filepath)
   if result.fail?
     halt env, status_code: 503, response: result.error
+  else
+    env.response.status_code = 200
+    result.ok
   end
-
-  result.ok
 end
 
 if !quiet

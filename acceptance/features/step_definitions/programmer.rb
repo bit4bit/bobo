@@ -12,7 +12,7 @@ class Result
   end
 
   def error?
-    !(@result.nil? && @result == "")
+    !@result.nil?
   end
 end
 
@@ -28,23 +28,22 @@ class HTTPPorts
 end
 
 class Mob
-  def initialize(mob_directory)
+  attr_reader :mob_http_port
+  attr_reader :id
+
+  def initialize(id, mob_directory)
     unless mob_directory
       raise "expected mob_directory"
     end
-
+    @id = id
     @mob_directory = mob_directory
     @mob_http_port = HTTPPorts.next
   end
 
   def start
-    @mob_pid = Process.spawn({"LOG_LEVEL" => "DEBUG"}, "#{$command_path} mob-start -d #{@mob_directory} -q --port #{@mob_http_port}")
+    @mob_pid = Process.spawn({"LOG_LEVEL" => "DEBUG"}, "#{$bin_path.join('bobomob')} test -d #{@mob_directory} -q --port #{@mob_http_port}")
   end
 
-  def id
-    res = RestClient.get("http://localhost:#{@mob_http_port}/id")
-    res.body
-  end
 
   def wait_started
     sleep 1
@@ -57,22 +56,27 @@ class Mob
 end
 
 class Programmer
-  def initialize(mob_directory)
+  def initialize(id, mob_http_port, mob_directory)
+    @id = id
     @mob_directory = mob_directory
-    @mob_http_port = HTTPPorts.next
+    @mob_http_port = mob_http_port
+    @port = HTTPPorts.next
+    
   end
 
   def start(mob_id)
-    @mob_pid = Process.spawn({"LOG_LEVEL" => "DEBUG"}, "#{$command_path} programmer -i #{mob_id} -d #{@mob_directory} -q --port #{@mob_http_port}")
+    @mob_pid = Process.spawn({"LOG_LEVEL" => "DEBUG"}, "#{$bin_path.join('boboprogrammer')} -i #{mob_id} -u #{@id} -d #{@mob_directory} -q --port #{@port} -l http://localhost:#{@mob_http_port}")
   end
 
   def mob_id
-    RestClient.get("http://localhost:#{@mob_http_port}/mobid").body
+    RestClient.get("http://localhost:#{@port}/mobid").body
   end
 
   def drive(file)
-    res = RestClient.post("http://localhost:#{@mob_http_port}/drive", {"filepath" => file})
-    if res.code == 200
+    res = RestClient.post("http://localhost:#{@port}/drive",
+                          {"filepath" => file})
+
+    if res.code.to_i == 200
       Result.new(ok: res.body)
     else
       Result.new(res.body)
@@ -105,13 +109,13 @@ After do |scenario|
 end
 
 When('I start mob') do
-  @mob = Mob.new(@project_dir)
+  @mob = Mob.new('test', @project_dir)
   @mob.start
   @mob.wait_started
 end
 
 Then('I can query mob ID') do
-  expect(@mob.id).to match(/^[0-9a-fA-Z]+$/)
+  expect(@mob.id).to match(/^[0-9a-zA-Z]+$/)
 end
 
 Given('example source code as {string}') do |name|
@@ -138,7 +142,7 @@ Given('In {string} file {string} has content {string}') do |project, file, conte
 end
 
 Then('I connect to mob started') do
-  @programmer = Programmer.new(@project_dir)
+  @programmer = Programmer.new('test', @mob.mob_http_port, @project_dir)
   @programmer.start(@mob.id)
   @programmer.wait_started()
 

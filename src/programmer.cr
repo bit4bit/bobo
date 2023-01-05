@@ -2,19 +2,13 @@
 
 module Bobo
   class Programmer
+    getter :id
 
-    def initialize(@id : String, mob_directory : String)
-      @mob_directory = Path[mob_directory]
+    def initialize(@id : String)
     end
 
     def mob_id : String
       @mob.id
-    end
-
-    def drive(mob : Mob, resource : Resource) : Result
-      mob.add_resource(resource)
-
-      Result.ok()
     end
 
     class Error < Exception

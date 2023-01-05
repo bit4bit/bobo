@@ -14,7 +14,6 @@ Log.setup_from_env
 
 quiet = false
 command = nil
-mob_id = nil
 http_port = 65300
 mob_directory = Dir.current
 
@@ -34,37 +33,34 @@ if quiet
   logging false
 end
 
+gateway = Bobo::Gateway::Mob.new()
+app = Bobo::Application::Mob.new(gateway)
 
-toxrpcsrv = Bobo::ToxRpc::Server.new(log: Log.for("toxrpc:mob"))
-toxrpcsrv.bootstrap()
-spawn name: "toxrpc tox iterate" do
-  loop do
-    toxrpcsrv.iterate()
+post "/:mob_id/drive" do |env|
+  mob_id = env.params.url["mob_id"].not_nil!
+  programmer_id = env.params.body["programmer_id"].not_nil!
+  resource_hash = env.params.body["resource_hash"].not_nil!
+  resource_id = env.params.body["resource_id"].not_nil!
+  file = env.params.files["resource"].tempfile
+  content = IO::Memory.new
+  IO.copy(file, content)
+
+  mob = gateway.get(mob_id)
+  programmer = gateway.get_programmer(programmer_id)
+  resource = Bobo::Resource.new(
+    resource_id,
+    programmer,
+    resource_hash,
+    content
+  )
+
+  result = mob.drive(programmer, resource)
+  if result.fail?
+    halt env, status_code: 403, response: result.error
+  else
+    env.response.status_code = 200
+    "ok"
   end
-end
-spawn name: "toxrpc runner" do
-  toxrpcsrv.listen()
-end
-if !quiet
-  puts "TOXID: #{toxrpcsrv.address}"
-end
-
-mob_id = toxrpcsrv.address
-provider = Bobo::MobProvider::Local.new(mob_id.not_nil!, mob_directory)
-app = Bobo::Application::Mob.new(provider)
-
-mob = provider.create()
-
-get "/id" do
-  app.get_id
-end
-
-toxrpcsrv.handle("get_resource") do |arguments|
-  id = arguments["id"].not_nil!
-
-  resource = mob.get_resource(id)
-
-  Bobo::Rpc::Reply.new()
 end
 
 if !quiet

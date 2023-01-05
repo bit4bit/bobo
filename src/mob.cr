@@ -7,7 +7,9 @@ module Bobo
       @resources = Hash(String, Resource).new()
     end
 
-    def can_drive?(programmer : Programmer, programmer_resource : Resource, mob_resource : Resource?)
+    def can_drive?(programmer : Programmer, resource : Resource)
+      mob_resource = @resources.fetch(resource.id, nil)
+
       if mob_resource.nil?
         return Result.ok()
       else
@@ -23,7 +25,10 @@ module Bobo
       @resources.fetch(id, nil)
     end
 
-    def drive(programmer : Programmer, path : String)
+    def drive(programmer : Programmer, resource : Resource)
+      result = can_drive?(programmer, resource)
+      return result if result.fail?
+
       Result.ok()
     end
 

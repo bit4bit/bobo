@@ -18,6 +18,7 @@ dependencies:
   cbor:
     git: https://git.sr.ht/~arestifo/crystal-cbor
   kemal:
-        github: kemalcr/kemal
-        
+    github: kemalcr/kemal
+  crest:
+    github: mamantoha/crest
 license: MIT
