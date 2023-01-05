@@ -1,17 +1,23 @@
+
+
 module Bobo
   class Programmer
-    getter :mob_id
 
-    def initialize(@mob_id : String, @mob_directory : String, @provider : Provider)
+    def initialize(@id : String, mob_directory : String)
+      @mob_directory = Path[mob_directory]
     end
 
-    def drive(path : String)
-      raise "can't drive file example.rb mismatch content"
+    def mob_id : String
+      @mob.id
     end
 
-    def self.connect(mob_id : String, directory : String, provider : Provider) : Programmer
-      new(mob_id, directory, provider)
+    def drive(mob : Mob, resource : Resource) : Result
+      mob.add_resource(resource)
+
+      Result.ok()
     end
 
+    class Error < Exception
+    end
   end
 end

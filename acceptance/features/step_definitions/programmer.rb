@@ -28,12 +28,17 @@ class HTTPPorts
 end
 
 class Mob
-  def initialize
+  def initialize(mob_directory)
+    unless mob_directory
+      raise "expected mob_directory"
+    end
+
+    @mob_directory = mob_directory
     @mob_http_port = HTTPPorts.next
   end
 
   def start
-    @mob_pid = Process.spawn("#{$command_path} mob-start -q --port #{@mob_http_port}")
+    @mob_pid = Process.spawn({"LOG_LEVEL" => "DEBUG"}, "#{$command_path} mob-start -d #{@mob_directory} -q --port #{@mob_http_port}")
   end
 
   def id
@@ -52,12 +57,13 @@ class Mob
 end
 
 class Programmer
-  def initialize
+  def initialize(mob_directory)
+    @mob_directory = mob_directory
     @mob_http_port = HTTPPorts.next
   end
 
   def start(mob_id)
-    @mob_pid = Process.spawn("#{$command_path} programmer -i #{mob_id} -q --port #{@mob_http_port}")
+    @mob_pid = Process.spawn({"LOG_LEVEL" => "DEBUG"}, "#{$command_path} programmer -i #{mob_id} -d #{@mob_directory} -q --port #{@mob_http_port}")
   end
 
   def mob_id
@@ -65,7 +71,7 @@ class Programmer
   end
 
   def drive(file)
-    res = RestClient.post("http://localhost:#{@mob_http_port}/drive", {"file" => file})
+    res = RestClient.post("http://localhost:#{@mob_http_port}/drive", {"filepath" => file})
     if res.code == 200
       Result.new(ok: res.body)
     else
@@ -99,7 +105,7 @@ After do |scenario|
 end
 
 When('I start mob') do
-  @mob = Mob.new
+  @mob = Mob.new(@project_dir)
   @mob.start
   @mob.wait_started
 end
@@ -132,7 +138,7 @@ Given('In {string} file {string} has content {string}') do |project, file, conte
 end
 
 Then('I connect to mob started') do
-  @programmer = Programmer.new()
+  @programmer = Programmer.new(@project_dir)
   @programmer.start(@mob.id)
   @programmer.wait_started()
 
@@ -146,5 +152,9 @@ end
 Then('drive fails with error message {string}') do |msg|
   expect(@result.error?).to be true
   expect(@result.error).to eq(msg)
+end
+
+Then('drive ok') do
+  expect(@result.error?).to be false
 end
 
