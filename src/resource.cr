@@ -23,7 +23,7 @@ module Bobo
       @content.dup
     end
 
-    def self.from_file(programmer_id : String, path : Path, relative_path : String)
+    def self.from_file(id : String, programmer_id : String, hash : String, path : Path, relative_path : String)
       if !File.exists?(path)
         raise "not found file #{path}"
       end
@@ -33,19 +33,11 @@ module Bobo
         IO.copy(f, content)
       end
 
-      hash = digest_file(path)
-      new(id: path.to_s,
+      new(id: id,
           relative_path: relative_path,
           programmer_id: programmer_id,
           hash: hash,
           content: content)
-    end
-
-    private def self.digest_file(file : String | Path) : String
-
-      digest = Digest::SHA256.new
-      digest.file(file)
-      digest.hexfinal
     end
   end
 end

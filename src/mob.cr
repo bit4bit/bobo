@@ -31,6 +31,18 @@ module Bobo
       end
     end
 
+    def release(programmer : Programmer, id : String)
+      resource = @resources.fetch(id, nil)
+      if resource.nil?
+        Result.fail("resource not found")
+      elsif resource.programmer_id == programmer.id
+        @resources.delete(id)
+        Result.ok()
+      else
+        Result.fail("programmer it's not driving the resource")
+      end
+    end
+
     def drive(programmer : Programmer, resource : Resource)
       result = can_drive?(programmer, resource)
       return result if result.fail?
@@ -38,10 +50,6 @@ module Bobo
       @resources[resource.id] = resource
 
       Result.ok()
-    end
-
-    def content_hash(path : String | Path) : String
-      @provider.digest_file(path)
     end
   end
 end

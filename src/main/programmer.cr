@@ -57,6 +57,19 @@ get "/mobid" do
   pgapp.get_mob_id(mob_id.not_nil!)
 end
 
+# MACHETE: delete /drive not works
+post "/drive/delete" do |env|
+  filepath = env.params.body["filepath"].as(String)
+
+  result = pgapp.release(mob_id.not_nil!, programmer_id.not_nil!, filepath)
+
+  if result.fail?
+    halt env, status_code: 503, response: result.error
+  else
+    result.ok
+  end
+end
+
 post "/drive" do |env|
   filepath = env.params.body["filepath"].as(String)
   result = pgapp.drive(mob_id.not_nil!, programmer_id.not_nil!, filepath)

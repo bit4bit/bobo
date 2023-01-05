@@ -13,6 +13,18 @@ module Bobo
                      @mob_directory : String)
       end
 
+      def file_hash(path : Path | String): String
+        digest = Digest::SHA256.new
+        digest.file(path)
+        digest.hexfinal
+      end
+
+      def hash(data : String) : String
+        digest = Digest::SHA256.new
+        digest << data
+        digest.hexfinal
+      end
+
       def get(id : String) : Bobo::Programmer
         Bobo::Programmer.new(id)
       end
@@ -68,6 +80,21 @@ module Bobo
         resources
       end
 
+      def release(mob_id : String, programmer_id : String, resource_id : String) : Result
+        url = "#{@mob_url}/#{mob_id}/drive/delete"
+
+        resp = Crest.post(url, {"mob_id" => mob_id,
+                                "programmer_id" => programmer_id,
+                                "id" => resource_id})
+        if resp.status_code == 200
+          Bobo::Result.ok()
+        else
+          Bobo::Result.fail(resp.body)
+        end
+      rescue ex : Crest::RequestFailed
+        Bobo::Result.fail(ex.response.body)
+      end
+
       def drive(mob_id : String, resource : Bobo::Resource) : Bobo::Result
         url = "#{@mob_url}/#{mob_id}/drive"
 
@@ -87,6 +114,8 @@ module Bobo
         else
           Bobo::Result.fail(resp.body)
         end
+      rescue ex : Crest::RequestFailed
+        Bobo::Result.fail(ex.response.body)
       end
     end
   end

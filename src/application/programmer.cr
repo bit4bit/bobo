@@ -25,11 +25,29 @@ module Bobo
         mob_id
       end
 
+      def release(mob_id : String, programmer_id : String, path : String) : Result
+        id = resource_id(path)
+
+        @gateway.release(mob_id, programmer_id, id)
+      end
+
       def drive(mob_id : String, programmer_id : String, path : String) : Result
-        resource = Resource.from_file(programmer_id, @mob_directory.join(path), relative_path: path)
+        local_path = @mob_directory.join(path)
+        hash = @gateway.file_hash(local_path)
+
+        resource = Resource.from_file(
+          id: resource_id(path),
+          programmer_id: programmer_id,
+          hash: hash,
+          path: local_path,
+          relative_path: path)
 
         result = @gateway.drive(mob_id, resource)
         result
+      end
+
+      private def resource_id(path : Path | String) : String
+        @gateway.hash(path)
       end
     end
   end

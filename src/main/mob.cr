@@ -70,6 +70,22 @@ get "/:mob_id/:programmer_id/resources" do |env|
   index
 end
 
+post "/:mob_id/drive/delete" do |env|
+  mob_id = env.params.url["mob_id"].not_nil!
+  programmer_id = env.params.body["programmer_id"].not_nil!
+  resource_id = env.params.body["id"].not_nil!
+
+  mob = gateway.get(mob_id)
+  programmer = gateway.get_programmer(programmer_id)
+
+  result = mob.release(programmer, resource_id)
+  if result.fail?
+    halt env, status_code: 403, response: result.error
+  else
+    "ok"
+  end
+end
+
 post "/:mob_id/drive" do |env|
   mob_id = env.params.url["mob_id"].not_nil!
   programmer_id = env.params.body["programmer_id"].not_nil!

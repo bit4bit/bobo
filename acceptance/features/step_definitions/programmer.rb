@@ -12,7 +12,7 @@ class Result
   end
 
   def error?
-    !@result.nil?
+    !@error.nil?
   end
 end
 
@@ -71,18 +71,29 @@ class Programmer
     RestClient.get("http://localhost:#{@port}/mobid").body
   end
 
+  def release(file)
+    res = RestClient.post("http://localhost:#{@port}/drive/delete",
+                          {"filepath" => file})
+
+    if res.code.to_i == 200
+      Result.new(nil, res.body)
+    else
+      Result.new(res.body)
+    end
+  rescue RestClient::Exception => e
+    Result.new(e.response.body)
+  end
+
   def drive(file)
     res = RestClient.post("http://localhost:#{@port}/drive",
                           {"filepath" => file})
 
     if res.code.to_i == 200
-      Result.new(ok: res.body)
+      Result.new(nil, res.body)
     else
       Result.new(res.body)
     end
-  rescue RestClient::InternalServerError => e
-    Result.new(e.response.body)
-  rescue RestClient::ServiceUnavailable => e
+  rescue RestClient::Exception => e
     Result.new(e.response.body)
   end
 
@@ -193,3 +204,20 @@ Then('In {string} file {string} expects content {string}') do |project, file, co
   end
 end
 
+Then('I release file {string}') do |file|
+  @result = @programmer.release(file)
+end
+
+Then('ok') do
+  if @result.error? != false
+    fail("expected ok")
+  end
+end
+
+Then('fails with message {string}') do |msg|
+  if @result.error? == false
+    fail("expected fails")
+  end
+
+  expect(msg).to eq(@result.error)
+end
