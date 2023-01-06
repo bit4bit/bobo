@@ -34,7 +34,7 @@ module Bobo
         url = "#{@mob_url}/#{mob_id}/#{programmer_id}/resources"
         resp = Crest.get(url, logging: false)
         if resp.status_code != 200
-          @log.debug { "fails to get resources: #{resp.body}" }
+          @log.debug { "errors to get resources: #{resp.body}" }
           return resources
         end
         resp.body.lines.each do |resource_id|
@@ -44,7 +44,7 @@ module Bobo
           url = "#{@mob_url}/#{mob_id}/resource"
           resp2 = Crest.get(url, headers: {"resource_id" => resource_id}, logging: false)
           if resp2.status_code != 200
-            @log.error { "fails to pull #{resource_id}: #{resp.body}" }
+            @log.error { "errors to pull #{resource_id}: #{resp.body}" }
             next
           end
 
@@ -89,10 +89,10 @@ module Bobo
         if resp.status_code == 200
           Bobo::Result.ok()
         else
-          Bobo::Result.fail(resp.body)
+          Bobo::Result.error(resp.body)
         end
-      rescue ex : Crest::RequestFailed
-        Bobo::Result.fail(ex.response.body)
+      rescue ex : Crest::RequestErrored
+        Bobo::Result.error(ex.response.body)
       end
 
       def drive(mob_id : String, resource : Bobo::Resource) : Bobo::Result
@@ -112,10 +112,10 @@ module Bobo
         if resp.status_code == 200
           Bobo::Result.ok()
         else
-          Bobo::Result.fail(resp.body)
+          Bobo::Result.error(resp.body)
         end
       rescue ex : Crest::RequestFailed
-        Bobo::Result.fail(ex.response.body)
+        Bobo::Result.error(ex.response.body)
       end
     end
   end

@@ -63,7 +63,7 @@ post "/drive/delete" do |env|
 
   result = pgapp.release(mob_id.not_nil!, programmer_id.not_nil!, filepath)
 
-  if result.fail?
+  if result.error?
     halt env, status_code: 503, response: result.error
   else
     result.ok
@@ -73,7 +73,7 @@ end
 post "/drive" do |env|
   filepath = env.params.body["filepath"].as(String)
   result = pgapp.drive(mob_id.not_nil!, programmer_id.not_nil!, filepath)
-  if result.fail?
+  if result.error?
     halt env, status_code: 503, response: result.error
   else
     env.response.status_code = 200

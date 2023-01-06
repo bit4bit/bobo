@@ -1,10 +1,10 @@
 module Bobo
-  class Result(Ok, Fail)
+  class Result(Ok, Error)
     getter :ok
-    def initialize(@fail : Fail = nil, @ok : Ok = nil)
+    def initialize(@error : Error = nil, @ok : Ok = nil)
     end
 
-    def self.fail(error : Fail)
+    def self.error(error : Error)
       new(error, nil)
     end
 
@@ -12,12 +12,12 @@ module Bobo
       new(nil, ok)
     end
 
-    def fail? : Bool
-      !@fail.nil?
+    def error? : Bool
+      !@error.nil?
     end
 
-    def error : Fail
-      @fail
+    def error : Error
+      @error
     end
   end
 end

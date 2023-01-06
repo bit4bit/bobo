@@ -79,7 +79,7 @@ post "/:mob_id/drive/delete" do |env|
   programmer = gateway.get_programmer(programmer_id)
 
   result = mob.release(programmer, resource_id)
-  if result.fail?
+  if result.error?
     halt env, status_code: 403, response: result.error
   else
     "ok"
@@ -105,7 +105,7 @@ post "/:mob_id/drive" do |env|
   )
 
   result = mob.drive(programmer, resource)
-  if result.fail?
+  if result.error?
     halt env, status_code: 403, response: result.error
   else
     log.debug { "new drive #{resource_id} of programmer #{programmer_id}" }

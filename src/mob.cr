@@ -24,12 +24,12 @@ module Bobo
     def release(programmer : Programmer, id : String)
       resource = @resources.fetch(id, nil)
       if resource.nil?
-        Result.fail("resource not found")
+        Result.error("resource not found")
       elsif resource.programmer_id == programmer.id
         @resources.delete(id)
         Result.ok()
       else
-        Result.fail("programmer it's not driving the resource")
+        Result.error("programmer it's not driving the resource")
       end
     end
 
@@ -41,15 +41,15 @@ module Bobo
       elsif mob_resource.programmer_id == programmer.id
         Result.ok()
       elsif mob_resource.programmer_id != programmer.id
-        Result.fail("other programmer it's driving the resource")
+        Result.error("other programmer it's driving the resource")
       else
-        Result.fail("unknown")
+        Result.error("unknown")
       end
     end
 
     def drive(programmer : Programmer, resource : Resource)
       result = can_drive?(programmer, resource)
-      return result if result.fail?
+      return result if result.error?
 
       @resources[resource.id] = resource
 
