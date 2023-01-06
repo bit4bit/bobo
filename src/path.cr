@@ -27,7 +27,7 @@ module Bobo
     end
 
     private def must_be_valid_path(path : ::Path | String)
-      if !path.to_s.matches?(/^\/*[0-9a-zA-z\/]+/)
+      if !path.to_s.matches?(/^\.?\/*[0-9a-zA-z\/]+/)
         raise Bobo::Error.new("invalid path")
       end
     end

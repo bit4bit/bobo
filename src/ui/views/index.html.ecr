@@ -1,0 +1,61 @@
+<!DOCTYPE>
+<html>
+  <head>
+    <title>UI BOBO</title>
+  </head>
+  <body>
+    <form action="/ui" method="get">
+      <input type="hidden" name="directory" value="<%= up_directory %>"/>
+      <input type="submit" value="up"/>
+    </form>
+
+      <div style="width: 100%; overflow:auto;">
+        <div style="float: left; width: 60%;">
+          <table>
+            <tbody>
+              <%- names.each do |name| %>
+              <tr>
+                <%- if name[1] == :directory %>
+                <td><b><%= name[0] %></b></td>
+                <td>
+                  <form action="/ui" method="get">
+                    <input type="hidden" name="directory" value="<%= name[0]%>"/>
+                    <input type="submit" value="enter"/>
+                  </form>
+                </td>
+                <%- else %>
+                <td><%= name[0] %></td>
+                <td>
+                  <form action="/ui/action/drive" method="post">
+                    <input type="hidden" name="filepath" value="<%= name[0]%>"/>
+                    <input type="submit" value="drive"/>
+                  </form>
+                </td>
+                <%- end %>
+              </tr>
+              <%- end %>
+            </tbody>
+          </table>
+        </div>
+        <div style="float: right:">
+          <table>
+            <tbody>
+              <%- drives.each do |name| %>
+              <tr>
+                <td>
+                  <%= name %>
+                </td>
+                <td>
+                  <form action="/ui/action/release" method="post">
+                    <input type="hidden" name="filepath" value="<%= name %>"/>
+                    <input type="submit" value="release"/>
+                  </form>
+                </td>
+              </tr>
+              <%- end %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+  </body>
+</html>

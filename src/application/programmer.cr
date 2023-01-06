@@ -1,4 +1,5 @@
 require "log"
+require "file_utils"
 
 module Bobo
   module Application
@@ -12,9 +13,13 @@ module Bobo
       def copilot(mob_id : String, programmer_id : String)
         resources = @gateway.resources_of_copilot(mob_id, programmer_id)
         resources.each do |resource|
-          @log.debug { "updating resource id: #{resource.id} to #{resource.relative_path} of programmer #{programmer_id}" }
-          resource_path = @mob_directory.join(resource.relative_path)
-          File.open(resource_path.to_path, "w") do |f|
+          resource_path = @mob_directory.join(resource.relative_path).to_path
+          resource_dirname = ::Path[resource_path].dirname
+          @log.debug { "updating resource id: #{resource.id} to #{resource_path} in #{resource_dirname} of programmer #{programmer_id}" }
+
+          FileUtils.mkdir_p(resource_dirname)
+
+          File.open(resource_path, "w") do |f|
             IO.copy(resource.content, f)
           end
           @log.debug { "updated resource id: #{resource.id}" }
