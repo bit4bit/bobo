@@ -9,12 +9,12 @@ module Bobo
         @mob_directory = Path[mob_directory]
       end
 
-      def synchronize_with_mob(mob_id : String, programmer_id : String)
+      def copilot(mob_id : String, programmer_id : String)
         resources = @gateway.resources_of_copilot(mob_id, programmer_id)
         resources.each do |resource|
           @log.debug { "updating resource id: #{resource.id} to #{resource.relative_path} of programmer #{programmer_id}" }
           resource_path = @mob_directory.join(resource.relative_path)
-          File.open(resource_path, "w") do |f|
+          File.open(resource_path.to_path, "w") do |f|
             IO.copy(resource.content, f)
           end
           @log.debug { "updated resource id: #{resource.id}" }
@@ -33,8 +33,10 @@ module Bobo
 
       def drive(mob_id : String, programmer_id : String, path : String) : Result
         local_path = @mob_directory.join(path)
-        hash = @gateway.file_hash(local_path)
+        puts local_path.to_path
+        return Result.error("not found file") unless File.exists?(local_path.to_path)
 
+        hash = @gateway.file_hash(local_path)
         resource = Resource.from_file(
           id: resource_id(path),
           programmer_id: programmer_id,
@@ -42,8 +44,9 @@ module Bobo
           path: local_path,
           relative_path: path)
 
-        result = @gateway.drive(mob_id, resource)
-        result
+        @gateway.drive(mob_id, resource)
+      rescue ex : Error
+        Result.error(ex.message)
       end
 
       private def resource_id(path : Path | String) : String

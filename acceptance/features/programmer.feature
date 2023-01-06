@@ -15,6 +15,15 @@ Feature: As Programmer
     And I drive file "example.rb"
     Then drive ok
 
+  Scenario: drive a file it's always in the project
+    Given example source code as "example-mob"
+    And example source code as "example-user"
+    And I inside "example-user"
+    When I start mob
+    Then I connect to mob started
+    And I drive file "/example.rb"
+    Then drive ok
+
   Scenario: release a drived file
     Given example source code as "example-mob"
     And example source code as "example-user"
@@ -47,3 +56,12 @@ Feature: As Programmer
     And partner "partner" drive file "example.rb"
     And I release file "example.rb"
     Then fails with message "programmer it's not driving the resource"
+
+  Scenario: can't drive a file out of project
+    Given example source code as "example-mob"
+    And example source code as "example-user"
+    And I inside "example-user"
+    When I start mob
+    Then I connect to mob started
+    And I drive file "../example-user/example.rb"
+    Then fails with message "invalid path"

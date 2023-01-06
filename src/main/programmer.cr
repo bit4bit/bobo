@@ -17,6 +17,7 @@ command = nil
 mob_id = nil
 mob_url = nil
 programmer_id = nil
+iteration_interval = 5
 http_port = 65300
 mob_directory = Dir.current
 
@@ -28,6 +29,7 @@ OptionParser.parse do |parser|
   parser.on("-i MOBID", "--mob-id=MOBID", "MOB ID") { |id| mob_id = id }
   parser.on("-u PROGRAMMERID", "--programmer-id=PROGRAMERID", "MOB ID") { |id| programmer_id = id }
   parser.on("-l MOBURL", "--mob-url=MOBURL", "MOB URL") { |url| mob_url = url }
+  parser.on("-t INTERVAL", "--internal=INTERVAL", "INTERVAL IN SECONDS") { |i| iteration_interval = i.to_i }
   parser.on("-h", "--help", "Show this help") do
     puts parser
     exit
@@ -83,8 +85,8 @@ end
 
 spawn do
   loop do
-    pgapp.synchronize_with_mob(mob_id.not_nil!, programmer_id.not_nil!)
-    sleep 1.second
+    pgapp.copilot(mob_id.not_nil!, programmer_id.not_nil!)
+    sleep iteration_interval.second
   end
 end
 

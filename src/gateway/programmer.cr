@@ -15,7 +15,7 @@ module Bobo
 
       def file_hash(path : Path | String): String
         digest = Digest::SHA256.new
-        digest.file(path)
+        digest.file(path.to_path)
         digest.hexfinal
       end
 
@@ -72,7 +72,7 @@ module Bobo
           resources << Bobo::Resource.new(
             id: resource_id.not_nil!,
             programmer_id: programmer_id.not_nil!,
-            relative_path: relative_path.not_nil!,
+            relative_path: Path[relative_path.not_nil!],
             hash: hash.not_nil!,
             content: content)
         end
@@ -105,7 +105,7 @@ module Bobo
            "programmer_id" => resource.programmer_id,
            "id" => resource.id,
            "hash" => resource.hash,
-           "relative_path" => resource.relative_path},
+           "relative_path" => resource.relative_path.to_s},
           logging: false
         )
 

@@ -1,4 +1,7 @@
 require "./result"
+require "./path"
+require "./error"
+require "./resource"
 require "./mob"
 require "./programmer"
 require "./application"

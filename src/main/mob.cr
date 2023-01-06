@@ -99,7 +99,7 @@ post "/:mob_id/drive" do |env|
   resource = Bobo::Resource.new(
     id: resource_id,
     programmer_id: programmer.id,
-    relative_path: relative_path,
+    relative_path: Bobo::Path.new(relative_path),
     hash: resource_hash,
     content: file
   )

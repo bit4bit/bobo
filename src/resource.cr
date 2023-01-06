@@ -9,7 +9,7 @@ module Bobo
 
     def initialize(
          @id : String,
-         @relative_path : String,
+         @relative_path : Bobo::Path,
          @programmer_id : String,
          @hash : String,
          content : IO)
@@ -23,21 +23,19 @@ module Bobo
       @content.dup
     end
 
-    def self.from_file(id : String, programmer_id : String, hash : String, path : Path, relative_path : String)
-      if !File.exists?(path)
-        raise "not found file #{path}"
-      end
-
+    def self.from_file(id : String, programmer_id : String, hash : String, path : Path, relative_path : String) : Resource
       content = IO::Memory.new()
-      File.open(path, "r") do |f|
+      File.open(path.to_path, "r") do |f|
         IO.copy(f, content)
       end
 
-      new(id: id,
-          relative_path: relative_path,
-          programmer_id: programmer_id,
-          hash: hash,
-          content: content)
+      resource = new(id: id,
+                     relative_path: Path[relative_path],
+                     programmer_id: programmer_id,
+                     hash: hash,
+                     content: content)
     end
+
+
   end
 end

@@ -64,7 +64,7 @@ class Programmer
   end
 
   def start(mob_id)
-    @mob_pid = Process.spawn({"LOG_LEVEL" => "INFO"}, "#{$bin_path.join('bobo-programmer')} -i #{mob_id} -u #{@id} -d #{@mob_directory} -q --port #{@port} -l http://localhost:#{@mob_http_port}")
+    @mob_pid = Process.spawn({"LOG_LEVEL" => "INFO"}, "#{$bin_path.join('bobo-programmer')} -i #{mob_id} -u #{@id} -d #{@mob_directory} -q --port #{@port} -l http://localhost:#{@mob_http_port} -t 1")
   end
 
   def mob_id
@@ -169,7 +169,9 @@ Then('drive fails with error message {string}') do |msg|
 end
 
 Then('drive ok') do
-  expect(@result.error?).to be false
+  if @result.error? != false
+    fail(@result.error)
+  end
 end
 
 
