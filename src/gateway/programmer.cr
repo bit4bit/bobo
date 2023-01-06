@@ -91,7 +91,7 @@ module Bobo
         else
           Bobo::Result.error(resp.body)
         end
-      rescue ex : Crest::RequestErrored
+      rescue ex : Crest::RequestFailed
         Bobo::Result.error(ex.response.body)
       end
 
