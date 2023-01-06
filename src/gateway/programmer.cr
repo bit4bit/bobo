@@ -10,7 +10,8 @@ module Bobo
       def initialize(@id : String,
                      @mob_url : String,
                      @log : Log,
-                     @mob_directory : String)
+                     @mob_directory : String,
+                     @sslcontext : OpenSSL::SSL::Context::Client)
       end
 
       def file_hash(path : Path | String): String
@@ -32,7 +33,7 @@ module Bobo
       def resources_of_copilot(mob_id : String, programmer_id : String) : Resources
         resources = Resources.new()
         url = "#{@mob_url}/#{mob_id}/#{programmer_id}/resources"
-        resp = Crest.get(url, logging: false)
+        resp = Crest.get(url, logging: false, tls: @sslcontext)
         if resp.status_code != 200
           @log.debug { "errors to get resources: #{resp.body}" }
           return resources
@@ -42,7 +43,7 @@ module Bobo
           @log.debug { "getting resource [#{resource_id}]" }
 
           url = "#{@mob_url}/#{mob_id}/resource"
-          resp2 = Crest.get(url, headers: {"resource_id" => resource_id}, logging: false)
+          resp2 = Crest.get(url, headers: {"resource_id" => resource_id}, logging: false, tls: @sslcontext)
           if resp2.status_code != 200
             @log.error { "errors to pull #{resource_id}: #{resp.body}" }
             next
@@ -85,7 +86,7 @@ module Bobo
 
         resp = Crest.post(url, {"mob_id" => mob_id,
                                 "programmer_id" => programmer_id,
-                                "id" => resource_id})
+                                "id" => resource_id}, tls: @sslcontext)
         if resp.status_code == 200
           Bobo::Result.ok()
         else
@@ -106,7 +107,8 @@ module Bobo
            "id" => resource.id,
            "hash" => resource.hash,
            "relative_path" => resource.relative_path.to_s},
-          logging: false
+          logging: false,
+          tls: @sslcontext
         )
 
         if resp.status_code == 200

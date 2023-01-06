@@ -119,6 +119,17 @@ if !quiet
   puts "MOB directory #{mob_directory}"
 end
 
+require "./ssl_memory"
+
 Kemal.run do |config|
-  config.server.not_nil!.bind_tcp http_port
+  ssl = SSLMemory.new
+  abort "SSL Key Not Found" if !File.exists?(ssl.key_path)
+  abort "SSL Certificate Not Found" if !File.exists?(ssl.cert_path)
+
+  sslctx = OpenSSL::SSL::Context::Server.new
+  sslctx.certificate_chain = ssl.cert_path
+  sslctx.private_key = ssl.key_path
+
+
+  config.server.not_nil!.bind_tls "0.0.0.0", http_port, sslctx
 end

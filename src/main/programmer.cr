@@ -47,10 +47,17 @@ raise "requires mob-id" if mob_id.nil?
 raise "requires programmer-id" if programmer_id.nil?
 raise "requires mob-url" if mob_url.nil?
 
+require "./ssl_memory_client"
+ssl = SSLMemoryClient.new
+abort "SSL Certificate Not Found" if !File.exists?(ssl.cert_path)
+sslctx = OpenSSL::SSL::Context::Client.new
+sslctx.ca_certificates = ssl.cert_path
+
 gateway = Bobo::Gateway::Programmer.new(programmer_id.not_nil!,
                                         mob_url.not_nil!,
                                         log,
-                                        mob_directory)
+                                        mob_directory,
+                                        sslcontext: sslctx)
 pgapp = Bobo::Application::Programmer.new(
   gateway: gateway,
   log: Log.for("programmer:application"),
