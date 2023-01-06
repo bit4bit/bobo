@@ -41,7 +41,7 @@ class Mob
   end
 
   def start
-    @mob_pid = Process.spawn({"LOG_LEVEL" => "INFO"}, "#{$bin_path.join('bobomob')} test -d #{@mob_directory} -q --port #{@mob_http_port}")
+    @mob_pid = Process.spawn({"LOG_LEVEL" => "INFO"}, "#{$bin_path.join('bobo-mob')} test -d #{@mob_directory} -q --port #{@mob_http_port}")
   end
 
 
@@ -64,7 +64,7 @@ class Programmer
   end
 
   def start(mob_id)
-    @mob_pid = Process.spawn({"LOG_LEVEL" => "INFO"}, "#{$bin_path.join('boboprogrammer')} -i #{mob_id} -u #{@id} -d #{@mob_directory} -q --port #{@port} -l http://localhost:#{@mob_http_port}")
+    @mob_pid = Process.spawn({"LOG_LEVEL" => "INFO"}, "#{$bin_path.join('bobo-programmer')} -i #{mob_id} -u #{@id} -d #{@mob_directory} -q --port #{@port} -l http://localhost:#{@mob_http_port}")
   end
 
   def mob_id

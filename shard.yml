@@ -5,9 +5,9 @@ authors:
   - Jovany Leandro G.C <bit4bit@riseup.net>
 
 targets:
-  bobomob:
+  bobo-mob:
     main: src/main/mob.cr
-  boboprogrammer:
+  bobo-programmer:
     main: src/main/programmer.cr
 
 crystal: 1.6.2
