@@ -7,16 +7,6 @@ module Bobo
       @resources = Hash(String, Resource).new()
     end
 
-    def can_drive?(programmer : Programmer, resource : Resource)
-      mob_resource = @resources.fetch(resource.id, nil)
-
-      if mob_resource.nil?
-        return Result.ok()
-      else
-        Result.fail("can't drive file example.rb mismatch content")
-      end
-    end
-
     def add_resource(resource : Resource)
       @resources[resource.id] = resource
     end
@@ -40,6 +30,20 @@ module Bobo
         Result.ok()
       else
         Result.fail("programmer it's not driving the resource")
+      end
+    end
+
+    def can_drive?(programmer : Programmer, programmer_resource : Resource)
+      mob_resource = @resources.fetch(programmer_resource.id, nil)
+
+      if mob_resource.nil?
+        Result.ok()
+      elsif mob_resource.programmer_id == programmer.id
+        Result.ok()
+      elsif mob_resource.programmer_id != programmer.id
+        Result.fail("other programmer it's driving the resource")
+      else
+        Result.fail("unknown")
       end
     end
 

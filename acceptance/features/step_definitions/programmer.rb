@@ -219,5 +219,5 @@ Then('fails with message {string}') do |msg|
     fail("expected fails")
   end
 
-  expect(msg).to eq(@result.error)
+  expect(@result.error).to eq(msg)
 end
