@@ -92,69 +92,23 @@ post "/drive" do |env|
 end
 
 # UI
-drives = Set(String).new()
+require "./ui"
 programmer_url = "http://localhost:#{http_port}"
-
-def browser(env, mob_directory, drives)
-  directory = env.params.query.fetch("directory", nil)
-  up_directory = mob_directory
-  up_directory = Path[directory].parent.relative_to(mob_directory).normalize.to_s if !directory.nil?
-  directory = mob_directory if [".", ".."].includes?(directory)
-  directory ||= mob_directory
-
-  names = Dir.children(directory).map do |name|
-    relname = Path[directory].join(name).relative_to(mob_directory).normalize.to_s
-    if File.directory?(name)
-      {relname, :directory}
-    else
-      {relname, :file}
-    end
-  end.reject {|n| drives.includes?(n[0]) }
-
-  render "src/ui/views/index.html.ecr"
-end
+ui = UI.new(pgapp: pgapp,
+            programmer_url: programmer_url,
+            mob_directory: mob_directory,
+            log: log)
+ui.install(mob_id.not_nil!, programmer_id.not_nil!, iteration_interval)
 get "/ui" do |env|
-  browser(env, mob_directory, drives)
+  ui.browser(env)
 end
 
 post "/ui/action/drive" do |env|
-  filepath = env.params.body["filepath"].as(String)
-
-  begin
-    resp = Crest.post("#{programmer_url}/drive", {"filepath" => filepath})
-    if resp.status_code == 200
-      drives.add(filepath)
-    end
-  rescue ex : Crest::RequestFailed
-    log.error { ex.message }
-  end
-
-  browser(env, mob_directory, drives)
+  ui.action_drive(env)
 end
 
 post "/ui/action/release" do |env|
-  filepath = env.params.body["filepath"].as(String)
-
-  begin
-    resp = Crest.post("#{programmer_url}/drive/delete", {"filepath" => filepath})
-    if resp.status_code == 200
-      drives.delete(filepath)
-    end
-  rescue ex : Crest::RequestFailed
-    log.error { ex.message }
-  end
-
-  browser(env, mob_directory, drives)
-end
-
-spawn do
-  loop do
-    pgapp.copilot(mob_id.not_nil!, programmer_id.not_nil!)
-    sleep iteration_interval.second
-  rescue ex : Exception
-    log.error { ex.inspect_with_backtrace }
-    sleep 15.second
-  end
+  ui.action_release(env)
 end
 
 if !quiet
