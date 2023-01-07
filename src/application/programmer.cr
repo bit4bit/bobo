@@ -34,10 +34,10 @@ module Bobo
         mob_id
       end
 
-      def release(mob_id : String, programmer_id : String, path : String) : Result
+      def handover(mob_id : String, programmer_id : String, path : String) : Result
         id = resource_id(path)
 
-        result = @gateway.release(mob_id, programmer_id, id)
+        result = @gateway.handover(mob_id, programmer_id, id)
         @drives.delete(path) if result.ok?
         result
       end

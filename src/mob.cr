@@ -21,7 +21,7 @@ module Bobo
       end
     end
 
-    def release(programmer : Programmer, id : String)
+    def handover(programmer : Programmer, id : String)
       resource = @resources.fetch(id, nil)
       if resource.nil?
         Result.error("resource not found")

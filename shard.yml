@@ -13,8 +13,6 @@ targets:
 crystal: 1.6.2
 
 dependencies:
-  tox:
-    path: ../tox.cr
   cbor:
     git: https://git.sr.ht/~arestifo/crystal-cbor
   kemal:

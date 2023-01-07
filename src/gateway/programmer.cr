@@ -68,7 +68,7 @@ module Bobo
         resources
       end
 
-      def release(mob_id : String, programmer_id : String, resource_id : String) : Result
+      def handover(mob_id : String, programmer_id : String, resource_id : String) : Result
         url = "#{@mob_url}/#{mob_id}/drive/delete"
 
         resp = Crest.post(url, {"mob_id" => mob_id,

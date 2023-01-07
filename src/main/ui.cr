@@ -37,7 +37,7 @@ class UI
     browser(env)
   end
 
-  def action_release(env)
+  def action_handover(env)
     filepath = env.params.body["filepath"].as(String)
 
     begin

@@ -4,7 +4,6 @@ require "dir"
 
 require "log"
 
-require "tox"
 require "kemal"
 
 require "../bobo"
@@ -78,7 +77,7 @@ post "/:mob_id/drive/delete" do |env|
   mob = gateway.get(mob_id)
   programmer = gateway.get_programmer(programmer_id)
 
-  result = mob.release(programmer, resource_id)
+  result = mob.handover(programmer, resource_id)
   if result.error?
     halt env, status_code: 403, response: result.error
   else
@@ -129,7 +128,7 @@ Kemal.run do |config|
   sslctx = OpenSSL::SSL::Context::Server.new
   sslctx.certificate_chain = ssl.cert_path
   sslctx.private_key = ssl.key_path
-
+  sslctx.verify_mode = :none
 
   config.server.not_nil!.bind_tls "0.0.0.0", http_port, sslctx
 end

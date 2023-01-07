@@ -1,10 +1,10 @@
+
 require "http/server"
 require "option_parser"
 require "dir"
 
 require "log"
 
-require "tox"
 require "kemal"
 
 require "../bobo"
@@ -52,6 +52,7 @@ ssl = SSLMemoryClient.new
 abort "SSL Certificate Not Found" if !File.exists?(ssl.cert_path)
 sslctx = OpenSSL::SSL::Context::Client.new
 sslctx.ca_certificates = ssl.cert_path
+sslctx.verify_mode = :none
 
 gateway = Bobo::Gateway::Programmer.new(mob_url.not_nil!,
                                         log,
@@ -71,7 +72,7 @@ end
 post "/drive/delete" do |env|
   filepath = env.params.body["filepath"].as(String)
 
-  result = pgapp.release(mob_id.not_nil!, programmer_id.not_nil!, filepath)
+  result = pgapp.handover(mob_id.not_nil!, programmer_id.not_nil!, filepath)
 
   if result.error?
     halt env, status_code: 503, response: result.error
@@ -106,8 +107,8 @@ post "/ui/action/drive" do |env|
   ui.action_drive(env)
 end
 
-post "/ui/action/release" do |env|
-  ui.action_release(env)
+post "/ui/action/handover" do |env|
+  ui.action_handover(env)
 end
 
 spawn do
