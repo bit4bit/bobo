@@ -4,7 +4,7 @@ class UI
   end
 
   def browser(env)
-    directory = env.params.query.fetch("directory", nil)
+    directory = env.params.query.fetch("directory", nil) || env.params.body.fetch("directory", nil)
     up_directory = @mob_directory
     up_directory = Path[directory].parent.relative_to(@mob_directory).normalize.to_s if !directory.nil?
     directory = @mob_directory if [".", ".."].includes?(directory)

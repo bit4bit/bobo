@@ -12,6 +12,7 @@
       <div style="width: 100%; overflow:auto;">
         <div style="float: left; width: 60%;">
           <table>
+            <thead><tr><td>Browsing Files</td><td>Actions</td></tr></thead>
             <tbody>
               <%- names.each do |name| %>
               <tr>
@@ -27,6 +28,7 @@
                 <td><%= name[0] %></td>
                 <td>
                   <form action="/ui/action/drive" method="post">
+                    <input type="hidden" name="directory" value="<%= directory%>"/>
                     <input type="hidden" name="filepath" value="<%= name[0]%>"/>
                     <input type="submit" value="drive"/>
                   </form>
@@ -39,6 +41,7 @@
         </div>
         <div style="float: right:">
           <table>
+            <thead><tr><td>Driving files</td><td>Actions</td></tr></thead>
             <tbody>
               <%- @drives.each do |name| %>
               <tr>
@@ -47,6 +50,7 @@
                 </td>
                 <td>
                   <form action="/ui/action/release" method="post">
+                    <input type="hidden" name="directory" value="<%= directory%>"/>
                     <input type="hidden" name="filepath" value="<%= name %>"/>
                     <input type="submit" value="release"/>
                   </form>
