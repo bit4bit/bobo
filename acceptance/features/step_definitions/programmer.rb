@@ -223,3 +223,13 @@ Then('fails with message {string}') do |msg|
 
   expect(@result.error).to eq(msg)
 end
+
+Then('I wait {int} seconds and in {string} file {string} is the same') do |wait, project, file|
+  project_dir = @projects_dir.fetch(project)
+  project_file = File.join(project_dir, file)
+  current_time = File.stat(project_file).mtime
+  sleep wait
+  end_time = File.stat(project_file).mtime
+
+  expect(end_time).to eq(current_time)
+end

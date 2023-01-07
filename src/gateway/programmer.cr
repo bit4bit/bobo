@@ -7,23 +7,10 @@ module Bobo
 
       getter :id
 
-      def initialize(@id : String,
-                     @mob_url : String,
+      def initialize(@mob_url : String,
                      @log : Log,
                      @mob_directory : String,
                      @sslcontext : OpenSSL::SSL::Context::Client)
-      end
-
-      def file_hash(path : Path | String): String
-        digest = Digest::SHA256.new
-        digest.file(path.to_path)
-        digest.hexfinal
-      end
-
-      def hash(data : String) : String
-        digest = Digest::SHA256.new
-        digest << data
-        digest.hexfinal
       end
 
       def get(id : String) : Bobo::Programmer

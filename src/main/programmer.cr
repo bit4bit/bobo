@@ -53,8 +53,7 @@ abort "SSL Certificate Not Found" if !File.exists?(ssl.cert_path)
 sslctx = OpenSSL::SSL::Context::Client.new
 sslctx.ca_certificates = ssl.cert_path
 
-gateway = Bobo::Gateway::Programmer.new(programmer_id.not_nil!,
-                                        mob_url.not_nil!,
+gateway = Bobo::Gateway::Programmer.new(mob_url.not_nil!,
                                         log,
                                         mob_directory,
                                         sslcontext: sslctx)

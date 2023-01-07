@@ -19,6 +19,8 @@ module Bobo
 
           FileUtils.mkdir_p(resource_dirname)
 
+          next if is_same_file(resource_path, resource)
+
           File.open(resource_path, "w") do |f|
             IO.copy(resource.content, f)
           end
@@ -40,7 +42,7 @@ module Bobo
         local_path = @mob_directory.join(path)
         return Result.error("not found file") unless File.exists?(local_path.to_path)
 
-        hash = @gateway.file_hash(local_path)
+        hash = Gateway::Hasher.file_hash(local_path)
         resource = Resource.from_file(
           id: resource_id(path),
           programmer_id: programmer_id,
@@ -54,7 +56,11 @@ module Bobo
       end
 
       private def resource_id(path : Path | String) : String
-        @gateway.hash(path)
+        Gateway::Hasher.hash(path)
+      end
+
+      private def is_same_file(path : ::Path | String, resource : Resource) : Bool
+        File.exists?(path) && Gateway::Hasher.file_hash(Path[path]) == resource.hash
       end
     end
   end

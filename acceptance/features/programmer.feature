@@ -1,8 +1,7 @@
 Feature: As Programmer
   Scenario: connect to active mob
-    Given example source code as "example-mob"
-    And example source code as "example-user"
-    And I inside "example-user"
+    Given example source code as "mycode"
+    And I inside "mycode"
     When I start mob
     Then I connect to mob started
 
