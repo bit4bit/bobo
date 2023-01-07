@@ -51,16 +51,4 @@ class UI
 
     browser(env)
   end
-
-  def install(mob_id : String, programmer_id : String, iteration_interval)
-    spawn do
-      loop do
-        @pgapp.copilot(mob_id.not_nil!, programmer_id.not_nil!)
-        sleep iteration_interval.second
-      rescue ex : Exception
-        @log.error { ex.inspect_with_backtrace }
-        sleep 15.second
-      end
-    end
-  end
 end

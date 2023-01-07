@@ -7,10 +7,12 @@ module Bobo
       def initialize(@gateway : Gateway::Programmer,
                      @log : Log,
                      mob_directory : String)
+        @drives = Set(String).new()
+
         @mob_directory = Path[mob_directory]
       end
 
-      def copilot(mob_id : String, programmer_id : String)
+      def copiloting(mob_id : String, programmer_id : String)
         resources = @gateway.resources_of_copilot(mob_id, programmer_id)
         resources.each do |resource|
           resource_path = @mob_directory.join(resource.relative_path).to_path
@@ -35,7 +37,15 @@ module Bobo
       def release(mob_id : String, programmer_id : String, path : String) : Result
         id = resource_id(path)
 
-        @gateway.release(mob_id, programmer_id, id)
+        result = @gateway.release(mob_id, programmer_id, id)
+        @drives.delete(path) if result.ok?
+        result
+      end
+
+      def driving(mob_id : String, programmer_id : String)
+        @drives.each do |drive_path|
+          drive(mob_id, programmer_id, drive_path)
+        end
       end
 
       def drive(mob_id : String, programmer_id : String, path : String) : Result
@@ -50,7 +60,9 @@ module Bobo
           path: local_path,
           relative_path: path)
 
-        @gateway.drive(mob_id, resource)
+        result = @gateway.drive(mob_id, resource)
+        @drives.add(path) if result.ok?
+        result
       rescue ex : Error
         Result.error(ex.message)
       end

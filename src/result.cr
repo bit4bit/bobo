@@ -12,6 +12,10 @@ module Bobo
       new(nil, ok)
     end
 
+    def ok? : Bool
+      !@ok.nil?
+    end
+
     def error? : Bool
       !@error.nil?
     end

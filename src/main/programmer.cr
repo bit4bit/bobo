@@ -98,7 +98,6 @@ ui = UI.new(pgapp: pgapp,
             programmer_url: programmer_url,
             mob_directory: mob_directory,
             log: log)
-ui.install(mob_id.not_nil!, programmer_id.not_nil!, iteration_interval)
 get "/ui" do |env|
   ui.browser(env)
 end
@@ -111,6 +110,16 @@ post "/ui/action/release" do |env|
   ui.action_release(env)
 end
 
+spawn do
+  loop do
+    pgapp.copiloting(mob_id.not_nil!, programmer_id.not_nil!)
+    pgapp.driving(mob_id.not_nil!, programmer_id.not_nil!)
+    sleep iteration_interval.second
+  rescue ex : Exception
+    log.error { ex.inspect_with_backtrace }
+    sleep 15.second
+  end
+end
 if !quiet
   puts "MOB directory #{mob_directory}"
 end
