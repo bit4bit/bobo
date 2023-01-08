@@ -1,5 +1,3 @@
-require "crest"
-
 module Bobo
   module Gateway
     class Programmer
@@ -10,7 +8,7 @@ module Bobo
       def initialize(@mob_url : String,
                      @log : Log,
                      @mob_directory : String,
-                     @sslcontext : OpenSSL::SSL::Context::Client)
+                     @protocol : Bobo::Gateway::Protocol)
       end
 
       def get(id : String) : Bobo::Programmer
@@ -20,7 +18,7 @@ module Bobo
       def resources_of_copilot(mob_id : String, programmer_id : String) : Resources
         resources = Resources.new()
         url = "#{@mob_url}/#{mob_id}/#{programmer_id}/resources"
-        resp = Crest.get(url, logging: false, tls: @sslcontext)
+        resp = @protocol.read(url)
         if resp.status_code != 200
           @log.debug { "errors to get resources: #{resp.body}" }
           return resources
@@ -30,7 +28,7 @@ module Bobo
           @log.debug { "getting resource [#{resource_id}]" }
 
           url = "#{@mob_url}/#{mob_id}/resource"
-          resp2 = Crest.get(url, headers: {"resource_id" => resource_id}, logging: false, tls: @sslcontext)
+          resp2 = @protocol.read(url, headers: {"resource_id" => resource_id})
           if resp2.status_code != 200
             @log.error { "errors to pull #{resource_id}: #{resp.body}" }
             next
@@ -71,31 +69,29 @@ module Bobo
       def handover(mob_id : String, programmer_id : String, resource_id : String) : Result
         url = "#{@mob_url}/#{mob_id}/drive/delete"
 
-        resp = Crest.post(url, {"mob_id" => mob_id,
-                                "programmer_id" => programmer_id,
-                                "id" => resource_id}, tls: @sslcontext)
+        resp = @protocol.create(url, {"mob_id" => mob_id,
+                                     "programmer_id" => programmer_id,
+                                     "id" => resource_id})
         if resp.status_code == 200
           Bobo::Result.ok()
         else
           Bobo::Result.error(resp.body)
         end
-      rescue ex : Crest::RequestFailed
+      rescue ex : Protocol::RequestFailed
         Bobo::Result.error(ex.response.body)
       end
 
       def drive(mob_id : String, resource : Bobo::Resource) : Bobo::Result
         url = "#{@mob_url}/#{mob_id}/drive"
 
-        resp = Crest.post(
+        resp = @protocol.create(
           url,
           {"content" => resource.content,
            "mob_id" => mob_id,
            "programmer_id" => resource.programmer_id,
            "id" => resource.id,
            "hash" => resource.hash,
-           "relative_path" => resource.relative_path.to_s},
-          logging: false,
-          tls: @sslcontext
+           "relative_path" => resource.relative_path.to_s}
         )
 
         if resp.status_code == 200
@@ -103,7 +99,7 @@ module Bobo
         else
           Bobo::Result.error(resp.body)
         end
-      rescue ex : Crest::RequestFailed
+      rescue ex : Protocol::RequestFailed
         Bobo::Result.error(ex.response.body)
       end
     end

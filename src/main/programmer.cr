@@ -8,12 +8,14 @@ require "log"
 require "kemal"
 
 require "../bobo"
-
+require "./tor"
 
 Log.setup_from_env
 
 log = Log.for("programmer:gateway")
 
+tor_connect = false
+tor_binary_path = nil
 quiet = false
 command = nil
 mob_id = nil
@@ -32,6 +34,8 @@ OptionParser.parse do |parser|
   parser.on("-u PROGRAMMERID", "--programmer-id=PROGRAMERID", "MOB ID") { |id| programmer_id = id }
   parser.on("-l MOBURL", "--mob-url=MOBURL", "MOB URL") { |url| mob_url = url }
   parser.on("-t INTERVAL", "--internal=INTERVAL", "INTERVAL IN SECONDS") { |i| iteration_interval = i.to_i }
+  parser.on("--tor", "ENABLE TOR PROXY") { tor_connect = true }
+  parser.on("--tor-binary-path=PATH", "TOR BINARY PATH") { |path| tor_binary_path=path }
   parser.on("-h", "--help", "Show this help") do
     puts parser
     exit
@@ -54,10 +58,16 @@ sslctx = OpenSSL::SSL::Context::Client.new
 sslctx.ca_certificates = ssl.cert_path
 sslctx.verify_mode = :none
 
+socks_port = nil
+if tor_connect
+  socks_port = Bobo::Tor::Config.ephemeral_port()
+end
+
+protocol = Bobo::Gateway::Protocol.new(sslctx)
 gateway = Bobo::Gateway::Programmer.new(mob_url.not_nil!,
                                         log,
                                         mob_directory,
-                                        sslcontext: sslctx)
+                                        protocol: protocol)
 pgapp = Bobo::Application::Programmer.new(
   gateway: gateway,
   log: Log.for("programmer:application"),
@@ -123,6 +133,17 @@ spawn do
 end
 if !quiet
   puts "MOB directory #{mob_directory}"
+end
+
+if tor_connect
+  spawn do
+    Bobo::Tor::Server.run do |config|
+      config.tor_alias = "programmer"
+      config.socks_port = socks_port
+      config.tor_binary_path = tor_binary_path
+    end
+    abort "tor stopped"
+  end
 end
 
 Kemal.run do |config|

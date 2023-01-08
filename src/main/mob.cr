@@ -11,6 +11,8 @@ require "../bobo"
 
 Log.setup_from_env
 
+tor_onion = false
+tor_binary_path = nil
 quiet = false
 command = nil
 http_port = 65300
@@ -21,6 +23,8 @@ OptionParser.parse do |parser|
   parser.on("-q", "--quiet", "QUIET") { |val| quiet = true }
   parser.on("-p PORT", "--port=PORT", "HTTP PORT") { |port| http_port = port.to_i }
   parser.on("-d DIRECTORY", "--mob-directory=DIRECTORY", "MOB DIRECTORY") { |path| mob_directory = path }
+  parser.on("--tor", "TOR ONION") { tor_onion = true }
+  parser.on("--tor-binary-path=PATH", "TOR BINARY PATH") { |path| tor_binary_path=path }
   parser.on("-h", "--help", "Show this help") do
     puts parser
     exit
@@ -118,8 +122,21 @@ if !quiet
   puts "MOB directory #{mob_directory}"
 end
 
-require "./ssl_memory"
 
+require "./tor"
+if tor_onion
+  spawn do
+    Bobo::Tor::Server.run do |config|
+      config.tor_alias = "mob"
+      config.tor_onion = true
+      config.tor_binary_path = tor_binary_path
+      config.mob_http_port = http_port
+    end
+    abort "tor stopped"
+  end
+end
+
+require "./ssl_memory"
 Kemal.run do |config|
   ssl = SSLMemory.new
   abort "SSL Key Not Found" if !File.exists?(ssl.key_path)
