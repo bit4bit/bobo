@@ -9,7 +9,7 @@ module Bobo
                      mob_directory : String)
         @drives = Set(String).new()
 
-        @mob_directory = Path[mob_directory]
+        @mob_directory = Path[::Path[mob_directory].expand]
       end
 
       def copiloting(mob_id : String, programmer_id : String)
