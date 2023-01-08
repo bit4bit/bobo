@@ -3,6 +3,7 @@ class UI
        @mob_id : String,
        @programmer_id : String,
        @pgapp : Bobo::Application::Programmer,
+       @pggw : Bobo::Gateway::Programmer,
        @programmer_url : String,
        @mob_directory : String,
        @log : Log
@@ -27,6 +28,8 @@ class UI
         {relname, :file}
       end
     end.reject {|n| @drives.includes?(n[0]) }.sort_by { |n| n[0] }
+
+    copiloting_resources = @pggw.resources_of_copilot(@mob_id, @programmer_id)
 
     render "src/ui/views/index.html.ecr"
   end

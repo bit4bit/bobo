@@ -111,6 +111,7 @@ ui = UI.new(
   mob_id: mob_id.not_nil!,
   programmer_id: programmer_id.not_nil!,
   pgapp: pgapp,
+  pggw: gateway,
   programmer_url: programmer_url,
   mob_directory: mob_directory,
   log: log
