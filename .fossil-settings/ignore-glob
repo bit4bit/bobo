@@ -1,0 +1,15 @@
+lib
+bin/
+/docs/
+/lib/
+/bin/
+/.shards/
+*.dwarf
+
+**#
+#**
+.#**
+**~
+**.pem
+**.key
+**.crt
