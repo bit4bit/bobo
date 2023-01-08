@@ -20,11 +20,10 @@ module Bobo::Gateway
     def create(url, form = {} of String => String) : Response
       if !@proxy.nil?
         uri = URI.parse(url)
-        client = ConnectProxy::HTTPClient.new(uri)
+        client = ConnectProxy::HTTPClient.new(uri, tls: @ssl)
         client.set_proxy(@proxy.not_nil!)
         Crest.post(url, form,
                    http_client: client,
-                   tls: @ssl,
                    logging: false).http_client_res
       else
         Crest.post(url, form, tls: @ssl, logging: false).http_client_res
@@ -34,13 +33,12 @@ module Bobo::Gateway
     def read(url, headers = {} of String => String) : Response
       if !@proxy.nil?
         uri = URI.parse(url)
-        client = ConnectProxy::HTTPClient.new(uri)
+        client = ConnectProxy::HTTPClient.new(uri, tls: @ssl)
         client.set_proxy(@proxy.not_nil!)
 
         Crest.get(url,
                   headers: headers,
                   logging: false,
-                  tls: @ssl,
                   http_client: client
                   ).http_client_res
       else
