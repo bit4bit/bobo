@@ -64,3 +64,11 @@ Feature: As Programmer
     Then I connect to mob started
     And I drive file "../example-user/example.rb"
     Then fails with message "invalid path"
+
+  Scenario: can't drive a file if overflow max file size
+    Given example source code as "mycode"
+    And I inside "mycode"
+    When I start mob
+    Then I connect to mob started with max-file-size 1 bytes
+    And I drive file "example.rb"
+    Then fails with message "overflow max size"

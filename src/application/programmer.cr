@@ -6,6 +6,7 @@ module Bobo
     class Programmer
       def initialize(@gateway : Gateway::Programmer,
                      @log : Log,
+                     @resource_specification : ResourceSpecification,
                      mob_directory : String)
         @drives = Set(String).new()
 
@@ -56,7 +57,6 @@ module Bobo
 
       def drive(mob_id : String, programmer_id : String, path : String) : Result
         local_path = @mob_directory.join(path)
-
         return Result.error("not found file") unless File.exists?(local_path.to_path)
 
         hash = Gateway::Hasher.file_hash(local_path)
@@ -66,6 +66,8 @@ module Bobo
           hash: hash,
           path: local_path,
           relative_path: path)
+        result = @resource_specification.isSatisfiedBy(resource)
+        return result if result.error?
 
         result = @gateway.drive(mob_id, resource)
         @drives.add(path) if result.ok?

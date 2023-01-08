@@ -1,3 +1,4 @@
+require "./application/specification"
 require "./application/programmer"
 require "./application/mob"
 

@@ -56,15 +56,18 @@ class Mob
 end
 
 class Programmer
-  def initialize(id, mob_http_port, mob_directory)
+  def initialize(id, mob_http_port, mob_directory, max_file_size: nil)
     @id = id
     @mob_directory = mob_directory
     @mob_http_port = mob_http_port
     @port = HTTPPorts.next
+    @max_file_size = max_file_size
   end
 
   def start(mob_id)
-    @mob_pid = Process.spawn({"LOG_LEVEL" => "INFO"}, "#{$bin_path.join('bobo-programmer')} -i #{mob_id} -u #{@id} -d #{@mob_directory} -q --port #{@port} -l https://localhost:#{@mob_http_port} -t 1")
+    args = "-i #{mob_id} -u #{@id} -d #{@mob_directory} -q --port #{@port} -l https://localhost:#{@mob_http_port} -t 1"
+    args += " --max-resource-content-size=#{@max_file_size}" if @max_file_size
+    @mob_pid = Process.spawn({"LOG_LEVEL" => "INFO"}, "#{$bin_path.join('bobo-programmer')} #{args} ")
   end
 
   def mob_id
@@ -159,6 +162,14 @@ Then('I connect to mob started') do
   expect(@programmer.mob_id).to eq(@mob.id)
 end
 
+Then('I connect to mob started with max-file-size {int} bytes') do |size|
+  @programmer = Programmer.new('test', @mob.mob_http_port, @project_dir, max_file_size: size)
+  @programmer.start(@mob.id)
+  @programmer.wait_started()
+
+  expect(@programmer.mob_id).to eq(@mob.id)
+end
+
 Then('I drive file {string}') do |file|
   @result = @programmer.drive(file)
 end
@@ -233,3 +244,4 @@ Then('I wait {int} seconds and in {string} file {string} is the same') do |wait,
 
   expect(end_time).to eq(current_time)
 end
+

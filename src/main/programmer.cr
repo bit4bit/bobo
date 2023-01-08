@@ -24,6 +24,7 @@ mob_url = nil
 programmer_id = nil
 iteration_interval = 5
 http_port = 65300
+max_resource_content_size = 1024 * 300 #300KB
 mob_directory = Dir.current
 
 OptionParser.parse do |parser|
@@ -35,6 +36,7 @@ OptionParser.parse do |parser|
   parser.on("-u PROGRAMMERID", "--programmer-id=PROGRAMERID", "MOB ID") { |id| programmer_id = id }
   parser.on("-l MOBURL", "--mob-url=MOBURL", "MOB URL") { |url| mob_url = url }
   parser.on("-t INTERVAL", "--internal=INTERVAL", "INTERVAL IN SECONDS") { |i| iteration_interval = i.to_i }
+  parser.on("--max-resource-content-size=BYTES", "max file size in bytes") { |i| max_resource_content_size = i.to_i }
   parser.on("--tor", "ENABLE TOR PROXY") { tor_connect = true }
   parser.on("--tor-binary-path=PATH", "TOR BINARY PATH") { |path| tor_binary_path = path }
   parser.on("--ssl-cert-path=PATH", "SSL CERTIFICATE PATH") { |path| ssl_cert_path = path }
@@ -70,9 +72,13 @@ gateway = Bobo::Gateway::Programmer.new(mob_url.not_nil!,
                                         log,
                                         mob_directory,
                                         protocol: protocol)
+resource_spec = Bobo::Application::ResourceSpecification.specification do |spec|
+  spec.allowed_content_size = max_resource_content_size
+end
 pgapp = Bobo::Application::Programmer.new(
   gateway: gateway,
   log: Log.for("programmer:application"),
+  resource_specification: resource_spec,
   mob_directory: mob_directory
 )
 

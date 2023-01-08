@@ -18,6 +18,7 @@ tor_binary_path = nil
 quiet = false
 command = nil
 http_port = 65300
+max_resource_content_size = 1024 * 300 #300KB
 mob_directory = Dir.current
 
 OptionParser.parse do |parser|
@@ -25,6 +26,7 @@ OptionParser.parse do |parser|
   parser.on("-q", "--quiet", "QUIET") { |val| quiet = true }
   parser.on("-p PORT", "--port=PORT", "HTTP PORT") { |port| http_port = port.to_i }
   parser.on("-d DIRECTORY", "--mob-directory=DIRECTORY", "MOB DIRECTORY") { |path| mob_directory = path }
+  parser.on("--max-resource-content-size=BYTES", "max file size in bytes") { |i| max_resource_content_size = i.to_i }
   parser.on("--tor", "TOR ONION") { tor_onion = true }
   parser.on("--tor-binary-path=PATH", "TOR BINARY PATH") { |path| tor_binary_path=path }
   parser.on("--ssl-key-path=PATH", "SSL KEY PATH") { |path| ssl_key_path = path }
@@ -42,8 +44,11 @@ if quiet
 end
 
 log = Log.for("mob")
+resource_spec = Bobo::Application::ResourceSpecification.specification do |spec|
+  spec.allowed_content_size = max_resource_content_size
+end
 gateway = Bobo::Gateway::Mob.new()
-app = Bobo::Application::Mob.new(gateway)
+app = Bobo::Application::Mob.new(gateway, resource_spec)
 
 get "/:mob_id/resource" do |env|
   mob_id = env.params.url["mob_id"].not_nil!
@@ -101,17 +106,15 @@ post "/:mob_id/drive" do |env|
   relative_path = env.params.body["relative_path"].not_nil!
   file = env.params.files["content"].tempfile
 
-  mob = gateway.get(mob_id)
-  programmer = gateway.get_programmer(programmer_id)
   resource = Bobo::Resource.new(
     id: resource_id,
-    programmer_id: programmer.id,
+    programmer_id: programmer_id,
     relative_path: Bobo::Path.new(relative_path),
     hash: resource_hash,
     content: file
   )
 
-  result = mob.drive(programmer, resource)
+  result = app.drive(mob_id, resource)
   if result.error?
     halt env, status_code: 403, response: result.error
   else
