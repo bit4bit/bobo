@@ -145,7 +145,7 @@ Kemal.run do |config|
   sslctx = OpenSSL::SSL::Context::Server.new
   sslctx.certificate_chain = ssl.cert_path
   sslctx.private_key = ssl.key_path
-  sslctx.verify_mode = :none
+  sslctx.verify_mode = LibSSL::VerifyMode::PEER
 
   config.server.not_nil!.bind_tls "0.0.0.0", http_port, sslctx
 end

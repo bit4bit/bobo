@@ -4,6 +4,7 @@ module Bobo
       @tor_binary_path : String? = nil
       @mob_http_port : Int32 = 0
       @socks_port : Int32? = nil
+      @http_tunnel_port : Int32? = nil
       @torrc_path : String? = nil
       @tor_working_dir : String? = nil
       @tor_process : Process? = nil
@@ -14,6 +15,7 @@ module Bobo
       property :mob_http_port
       property :tor_binary_path
       property :socks_port
+      property :http_tunnel_port
       property :torrc_path
       property :tor_working_dir
       property :tor_onion
@@ -24,9 +26,10 @@ module Bobo
         File.open(torrc_path.not_nil!, "w", perm: 0o700) do |f|
           if tor_onion
             f.puts "HiddenServiceDir #{tor_working_dir}"
-            f.puts "HiddenServicePort 80 127.0.0.1:#{mob_http_port}"
+            f.puts "HiddenServicePort 443 127.0.0.1:#{mob_http_port}"
           end
-          f.puts "SocksPort #{socks_port}"
+          f.puts "SocksPort #{socks_port.not_nil!}"
+          f.puts "HTTPTunnelPort #{http_tunnel_port.not_nil!}"
         end
         FileUtils.mkdir_p(tor_working_dir.not_nil!, mode: 0o700)
       end
@@ -50,6 +53,7 @@ module Bobo
         self.tor_working_dir ||= File.join(Dir.tempdir, "bobo-#{self.tor_alias}-tor-working")
         self.tor_binary_path ||= Process.find_executable("tor")
         self.socks_port ||= Config.ephemeral_port()
+        self.http_tunnel_port ||= Config.ephemeral_port()
       end
 
       def self.ephemeral_port(): Int32

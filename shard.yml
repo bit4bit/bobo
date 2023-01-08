@@ -13,10 +13,14 @@ targets:
 crystal: 1.6.2
 
 dependencies:
-  cbor:
-    git: https://git.sr.ht/~arestifo/crystal-cbor
   kemal:
     github: kemalcr/kemal
   crest:
     github: mamantoha/crest
+  socks:
+    github: jkthorne/sox
+  herbal:
+    github: 636f7374/herbal.cr
+  connect-proxy:
+    github: spider-gazelle/connect-proxy
 license: MIT

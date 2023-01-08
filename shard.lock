@@ -4,17 +4,29 @@ shards:
     git: https://github.com/sija/backtracer.cr.git
     version: 1.2.2
 
-  cbor:
-    git: https://git.sr.ht/~arestifo/crystal-cbor
-    version: 0.2.1
+  coffee:
+    git: https://github.com/636f7374/coffee.cr.git
+    version: 0.1.1
+
+  connect-proxy:
+    git: https://github.com/spider-gazelle/connect-proxy.git
+    version: 2.0.0
 
   crest:
     git: https://github.com/mamantoha/crest.git
     version: 1.3.6
 
+  durian:
+    git: https://github.com/636f7374/durian.cr.git
+    version: 0.1.5
+
   exception_page:
     git: https://github.com/crystal-loot/exception_page.git
     version: 0.3.0
+
+  herbal:
+    git: https://github.com/636f7374/herbal.cr.git
+    version: 0.1.3
 
   http-client-digest_auth:
     git: https://github.com/mamantoha/http-client-digest_auth.git
@@ -24,6 +36,10 @@ shards:
     git: https://github.com/mamantoha/http_proxy.git
     version: 0.9.0
 
+  ipaddress:
+    git: https://github.com/64726f70/ipaddress.cr.git
+    version: 1.0.0
+
   kemal:
     git: https://github.com/kemalcr/kemal.git
     version: 1.3.0
@@ -32,7 +48,11 @@ shards:
     git: https://github.com/luislavena/radix.git
     version: 0.4.1
 
-  tox:
-    path: ../tox.cr
+  socks:
+    git: https://github.com/jkthorne/sox.git
     version: 0.1.0
+
+  wrench:
+    git: https://github.com/73686f77/wrench.cr.git
+    version: 0.1.3
 

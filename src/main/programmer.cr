@@ -55,15 +55,15 @@ require "./ssl_memory_client"
 ssl = SSLMemoryClient.new
 abort "SSL Certificate Not Found" if !File.exists?(ssl.cert_path)
 sslctx = OpenSSL::SSL::Context::Client.new
-sslctx.ca_certificates = ssl.cert_path
-sslctx.verify_mode = :none
+sslctx.certificate_chain = ssl.cert_path
+sslctx.verify_mode = LibSSL::VerifyMode::NONE
 
-socks_port = nil
+http_tunnel_port = nil
 if tor_connect
-  socks_port = Bobo::Tor::Config.ephemeral_port()
+  http_tunnel_port = Bobo::Tor::Config.ephemeral_port()
 end
 
-protocol = Bobo::Gateway::Protocol.new(sslctx)
+protocol = Bobo::Gateway::Protocol.new(sslctx, http_tunnel_port)
 gateway = Bobo::Gateway::Programmer.new(mob_url.not_nil!,
                                         log,
                                         mob_directory,
@@ -139,7 +139,7 @@ if tor_connect
   spawn do
     Bobo::Tor::Server.run do |config|
       config.tor_alias = "programmer"
-      config.socks_port = socks_port
+      config.http_tunnel_port = http_tunnel_port
       config.tor_binary_path = tor_binary_path
     end
     abort "tor stopped"
