@@ -35,8 +35,10 @@ module Bobo
       end
 
       def handover(mob_id : String, programmer_id : String, path : String) : Result
-        id = resource_id(path)
+        # force synchronization of driving resource
+        drive(mob_id, programmer_id, path)
 
+        id = resource_id(path)
         result = @gateway.handover(mob_id, programmer_id, id)
         @drives.delete(path) if result.ok?
         result

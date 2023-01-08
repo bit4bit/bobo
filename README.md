@@ -22,8 +22,14 @@ TODO: Write usage instructions here
 
 ## Development
 
-TODO: Write development instructions here
-
+1. testing
+  1. `cd acceptante`
+  2. `bundle install --path .vendor`
+  3. `bash ../scripts/ssl_self.sh localhost`
+  4. `bundle exec cucumber`
+2. compiling
+  1. `rake prod`
+  
 ## Contributing
 
 1. Fork it (<https://github.com/your-github-user/bobo/fork>)
