@@ -111,6 +111,11 @@ ui = UI.new(pgapp: pgapp,
             programmer_url: programmer_url,
             mob_directory: mob_directory,
             log: log)
+
+get "/" do |env|
+  env.redirect "/ui"
+end
+
 get "/ui" do |env|
   ui.browser(env)
 end
