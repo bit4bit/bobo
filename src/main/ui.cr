@@ -10,9 +10,11 @@ class UI
     directory = @mob_directory if [".", ".."].includes?(directory)
     directory ||= @mob_directory
 
-    names = Dir.children(directory).map do |name|
-      relname = Path[directory].join(name).relative_to(@mob_directory).normalize.to_s
-      if File.directory?(name)
+    workspace = Path[@mob_directory].join(directory)
+    names = Dir.children(workspace).map do |name|
+      relname = workspace.join(name).relative_to(@mob_directory).normalize.to_s
+      abspath = workspace.join(name)
+      if File.directory?(abspath)
         {relname, :directory}
       else
         {relname, :file}

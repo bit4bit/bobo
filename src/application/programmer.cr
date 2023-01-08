@@ -52,6 +52,7 @@ module Bobo
 
       def drive(mob_id : String, programmer_id : String, path : String) : Result
         local_path = @mob_directory.join(path)
+
         return Result.error("not found file") unless File.exists?(local_path.to_path)
 
         hash = Gateway::Hasher.file_hash(local_path)
