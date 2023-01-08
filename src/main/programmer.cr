@@ -16,6 +16,7 @@ log = Log.for("programmer:gateway")
 
 tor_connect = false
 tor_binary_path = nil
+ssl_cert_path = nil
 quiet = false
 command = nil
 mob_id = nil
@@ -35,7 +36,8 @@ OptionParser.parse do |parser|
   parser.on("-l MOBURL", "--mob-url=MOBURL", "MOB URL") { |url| mob_url = url }
   parser.on("-t INTERVAL", "--internal=INTERVAL", "INTERVAL IN SECONDS") { |i| iteration_interval = i.to_i }
   parser.on("--tor", "ENABLE TOR PROXY") { tor_connect = true }
-  parser.on("--tor-binary-path=PATH", "TOR BINARY PATH") { |path| tor_binary_path=path }
+  parser.on("--tor-binary-path=PATH", "TOR BINARY PATH") { |path| tor_binary_path = path }
+  parser.on("--ssl-cert-path=PATH", "SSL CERTIFICATE PATH") { |path| ssl_cert_path = path }
   parser.on("-h", "--help", "Show this help") do
     puts parser
     exit
@@ -51,12 +53,12 @@ raise "requires mob-id" if mob_id.nil?
 raise "requires programmer-id" if programmer_id.nil?
 raise "requires mob-url" if mob_url.nil?
 
-require "./ssl_memory_client"
-ssl = SSLMemoryClient.new
-abort "SSL Certificate Not Found" if !File.exists?(ssl.cert_path)
+
+ssl_cert_path ||= "client.pem"
+abort "SSL Certificate Not Found at #{ssl_cert_path}" if !File.exists?(ssl_cert_path.not_nil!)
+
 sslctx = OpenSSL::SSL::Context::Client.new
-sslctx.certificate_chain = ssl.cert_path
-sslctx.verify_mode = LibSSL::VerifyMode::NONE
+sslctx.ca_certificates = ssl_cert_path.not_nil!
 
 http_tunnel_port = nil
 if tor_connect

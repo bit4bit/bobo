@@ -11,6 +11,8 @@ require "../bobo"
 
 Log.setup_from_env
 
+ssl_key_path = nil
+ssl_cert_path = nil
 tor_onion = false
 tor_binary_path = nil
 quiet = false
@@ -25,8 +27,11 @@ OptionParser.parse do |parser|
   parser.on("-d DIRECTORY", "--mob-directory=DIRECTORY", "MOB DIRECTORY") { |path| mob_directory = path }
   parser.on("--tor", "TOR ONION") { tor_onion = true }
   parser.on("--tor-binary-path=PATH", "TOR BINARY PATH") { |path| tor_binary_path=path }
+  parser.on("--ssl-key-path=PATH", "SSL KEY PATH") { |path| ssl_key_path = path }
+  parser.on("--ssl-cert-path=PATH", "SSL CERT PATH") { |path| ssl_cert_path = path }
   parser.on("-h", "--help", "Show this help") do
     puts parser
+    puts "please generate ssl certificate and key using script/ssl_self.sh <hostname or tor hostname>"
     exit
   end
 end.parse
@@ -136,15 +141,16 @@ if tor_onion
   end
 end
 
-require "./ssl_memory"
 Kemal.run do |config|
-  ssl = SSLMemory.new
-  abort "SSL Key Not Found" if !File.exists?(ssl.key_path)
-  abort "SSL Certificate Not Found" if !File.exists?(ssl.cert_path)
+  ssl_key_path ||= "server.key"
+  ssl_cert_path ||= "server.pem"
+  
+  abort "SSL Key Not Found" if !File.exists?(ssl_key_path.not_nil!)
+  abort "SSL Certificate Not Found" if !File.exists?(ssl_cert_path.not_nil!)
 
   sslctx = OpenSSL::SSL::Context::Server.new
-  sslctx.certificate_chain = ssl.cert_path
-  sslctx.private_key = ssl.key_path
+  sslctx.certificate_chain = ssl_cert_path.not_nil!
+  sslctx.private_key = ssl_key_path.not_nil!
   sslctx.verify_mode = LibSSL::VerifyMode::PEER
 
   config.server.not_nil!.bind_tls "0.0.0.0", http_port, sslctx
