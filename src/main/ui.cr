@@ -4,7 +4,7 @@ class UI
   end
 
   def browser(env)
-    directory = env.params.query.fetch("directory", nil) || env.params.body.fetch("directory", nil)
+    directory = env.params.query.fetch("directory", nil) || env.params.body.fetch("directory", nil) || env.params.query.fetch("directory", nil)
     up_directory = @mob_directory
     up_directory = Path[directory].parent.relative_to(@mob_directory).normalize.to_s if !directory.nil?
     directory = @mob_directory if [".", ".."].includes?(directory)
@@ -23,6 +23,7 @@ class UI
   end
 
   def action_drive(env)
+    directory = env.params.body.fetch("directory", ".")
     filepath = env.params.body["filepath"].as(String)
 
     begin
@@ -34,10 +35,11 @@ class UI
       @log.error { ex.message }
     end
 
-    browser(env)
+    env.redirect "/ui?directory=#{directory}"
   end
 
   def action_handover(env)
+    directory = env.params.body.fetch("directory", ".")
     filepath = env.params.body["filepath"].as(String)
 
     begin
@@ -49,6 +51,6 @@ class UI
       @log.error { ex.message }
     end
 
-    browser(env)
+    env.redirect "/ui?directory=#{directory}"
   end
 end
