@@ -4,20 +4,30 @@
     <title>UI BOBO</title>
   </head>
   <body>
-    <form action="/ui" method="get">
-      <input type="hidden" name="directory" value="<%= up_directory %>"/>
-      <input type="submit" value="up"/>
-    </form>
+    <div style="width: 100%; overflow:auto;">
+      <form action="/ui" method="get" style="float: left;">
+        <input type="submit" value="Root"/>
+      </form> 
+      <form action="/ui" method="get" style="float: left;">
+        <input type="hidden" name="directory" value="<%= directory %>"/>
+        <input type="submit" value="Refresh"/>
+      </form>
+      <p style="float: left; margin: 0; padding: 0">MOB ID: <%= @mob_id  %> PROGRAMMER ID: <%= @programmer_id  %></p>
+    </div>
 
       <div style="width: 100%; overflow:auto;">
         <div style="float: left; width: 60%;">
           <table>
-            <thead><tr><td><b>Browsing Files</b></td><td><b>Actions</b></td></tr></thead>
+            <caption>Browser</caption>
+            <thead><tr><td><form action="/ui" method="get" style="float: left;">
+        <input type="hidden" name="directory" value="<%= up_directory %>"/>
+        <input type="submit" value="UP"/>
+      </form><b>Browsing Files</b></td><td><b>Actions</b></td></tr></thead>
             <tbody>
               <%- names.each do |name| %>
               <tr>
                 <%- if name[1] == :directory %>
-                <td><b><a href="/ui?directory=<%= name[0] %>"><%= name[0] %></a></b></td>
+                <td><b><a href="/ui?directory=<%= name[0] %>"><%= name[0] %>/</a></b></td>
                 <td>
                   <form action="/ui" method="get">
                     <input type="hidden" name="directory" value="<%= name[0]%>"/>
@@ -41,7 +51,8 @@
         </div>
         <div style="float: right:">
           <table>
-            <thead><tr><td><b>Driving files</b></td><td><b>Actions</b></td></tr></thead>
+            <caption>Current</caption>
+            <thead><tr><td><b>Driving</b></td><td><b>Actions</b></td></tr></thead>
             <tbody>
               <%- @drives.each do |name| %>
               <tr>

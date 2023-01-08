@@ -1,5 +1,12 @@
 class UI
-  def initialize(@pgapp : Bobo::Application::Programmer, @programmer_url : String, @mob_directory : String, @log : Log)
+  def initialize(
+       @mob_id : String,
+       @programmer_id : String,
+       @pgapp : Bobo::Application::Programmer,
+       @programmer_url : String,
+       @mob_directory : String,
+       @log : Log
+     )
     @drives = Set(String).new()
   end
 

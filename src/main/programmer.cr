@@ -107,10 +107,14 @@ end
 # UI
 require "./ui"
 programmer_url = "http://localhost:#{http_port}"
-ui = UI.new(pgapp: pgapp,
-            programmer_url: programmer_url,
-            mob_directory: mob_directory,
-            log: log)
+ui = UI.new(
+  mob_id: mob_id.not_nil!,
+  programmer_id: programmer_id.not_nil!,
+  pgapp: pgapp,
+  programmer_url: programmer_url,
+  mob_directory: mob_directory,
+  log: log
+)
 
 get "/" do |env|
   env.redirect "/ui"
