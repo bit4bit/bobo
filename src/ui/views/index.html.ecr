@@ -12,12 +12,12 @@
       <div style="width: 100%; overflow:auto;">
         <div style="float: left; width: 60%;">
           <table>
-            <thead><tr><td>Browsing Files</td><td>Actions</td></tr></thead>
+            <thead><tr><td><b>Browsing Files</b></td><td><b>Actions</b></td></tr></thead>
             <tbody>
               <%- names.each do |name| %>
               <tr>
                 <%- if name[1] == :directory %>
-                <td><b><%= name[0] %></b></td>
+                <td><b><a href="/ui?directory=<%= name[0] %>"><%= name[0] %></a></b></td>
                 <td>
                   <form action="/ui" method="get">
                     <input type="hidden" name="directory" value="<%= name[0]%>"/>
@@ -41,7 +41,7 @@
         </div>
         <div style="float: right:">
           <table>
-            <thead><tr><td>Driving files</td><td>Actions</td></tr></thead>
+            <thead><tr><td><b>Driving files</b></td><td><b>Actions</b></td></tr></thead>
             <tbody>
               <%- @drives.each do |name| %>
               <tr>

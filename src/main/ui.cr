@@ -19,7 +19,7 @@ class UI
       else
         {relname, :file}
       end
-    end.reject {|n| @drives.includes?(n[0]) }
+    end.reject {|n| @drives.includes?(n[0]) }.sort_by { |n| n[0] }
 
     render "src/ui/views/index.html.ecr"
   end
