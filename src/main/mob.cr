@@ -73,7 +73,8 @@ get "/:mob_id/:programmer_id/resources" do |env|
 
   index = ""
   resources.each do |resource|
-    index += "#{resource.id}\n"
+    metadata =  Bobo::Gateway::ResourceMetadata.from_resource(resource)
+    index += metadata.to_wire + "\n"
   end
   index
 end
@@ -144,7 +145,7 @@ end
 Kemal.run do |config|
   ssl_key_path ||= "server.key"
   ssl_cert_path ||= "server.pem"
-  
+
   abort "SSL Key Not Found" if !File.exists?(ssl_key_path.not_nil!)
   abort "SSL Certificate Not Found" if !File.exists?(ssl_cert_path.not_nil!)
 

@@ -2,43 +2,29 @@ module Bobo
   module Gateway
     class Programmer
       alias Resources = Array(Bobo::Resource)
-
+      alias ResourcesMetadata = Array(Bobo::Gateway::ResourceMetadata)
       getter :id
 
       def initialize(@mob_url : String,
                      @log : Log,
                      @mob_directory : String,
-                     @protocol : Bobo::Gateway::Protocol)
+                     @protocol : Bobo::Gateway::Protocol,
+                     @hasher = Bobo::Gateway::Hasher.new)
       end
 
       def get(id : String) : Bobo::Programmer
         Bobo::Programmer.new(id)
       end
 
-      def resources_of_copilot(mob_id : String, programmer_id : String) : Resources
-        resources = Resources.new()
-        url = "#{@mob_url}/#{mob_id}/#{programmer_id}/resources"
-        resp = @protocol.read(url)
-        if resp.status_code != 200
-          @log.debug { "errors to get resources: #{resp.body}" }
-          return resources
-        end
-        resp.body.lines.each do |resource_id|
-          next if resource_id == ""
-          @log.debug { "getting resource [#{resource_id}]" }
-
+      def resource(mob_id : String, metadata : Bobo::Gateway::ResourceMetadata) : Bobo::Result
           url = "#{@mob_url}/#{mob_id}/resource"
-          resp2 = @protocol.read(url, headers: {"resource_id" => resource_id})
-          if resp2.status_code != 200
-            @log.error { "errors to pull #{resource_id}: #{resp.body}" }
-            next
+          resp = @protocol.read(url, headers: {"resource_id" => metadata.id})
+          if resp.status_code != 200
+            return Result.error("errors getting resource #{metadata.id}: #{resp.body}")
           end
 
-          programmer_id = nil
-          hash = nil
-          relative_path = nil
           content = IO::Memory.new()
-          resource_data = IO::Memory.new(resp2.body)
+          resource_data = IO::Memory.new(resp.body)
           HTTP::FormData.parse(resource_data, "boundary") do |part|
             case part.name
             when "programmer_id"
@@ -54,13 +40,29 @@ module Bobo
             end
           end
 
-          @log.debug { "pull resource #{resource_id} of programmer #{programmer_id}" }
-          resources << Bobo::Resource.new(
-            id: resource_id.not_nil!,
-            programmer_id: programmer_id.not_nil!,
-            relative_path: Path[relative_path.not_nil!],
-            hash: hash.not_nil!,
+          r = Bobo::Resource.new(
+            id: metadata.id,
+            programmer_id: metadata.programmer_id,
+            relative_path: Path[metadata.relative_path],
+            hash: metadata.hash,
             content: content)
+          Result.ok(r)
+      end
+
+      def resources_of_copilot(mob_id : String, programmer_id : String) : ResourcesMetadata
+        resources = ResourcesMetadata.new()
+
+        url = "#{@mob_url}/#{mob_id}/#{programmer_id}/resources"
+        resp = @protocol.read(url)
+        if resp.status_code != 200
+          @log.debug { "errors to get resources: #{resp.body}" }
+          return resources
+        end
+
+        resp.body.lines.each do |metadata_raw|
+          metadata = Bobo::Gateway::ResourceMetadata.from_wire(metadata_raw)
+          next if metadata.id == ""
+          resources << metadata
         end
 
         resources

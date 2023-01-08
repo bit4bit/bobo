@@ -13,16 +13,20 @@ module Bobo
       end
 
       def copiloting(mob_id : String, programmer_id : String)
-        resources = @gateway.resources_of_copilot(mob_id, programmer_id)
-        resources.each do |resource|
-          resource_path = @mob_directory.join(resource.relative_path).to_path
+        resources_metadata = @gateway.resources_of_copilot(mob_id, programmer_id)
+        resources_metadata.each do |metadata|
+          resource_path = @mob_directory.join(metadata.relative_path).to_path
           resource_dirname = ::Path[resource_path].dirname
+
+          # mismo hash omitimos sincronizacion
+          next if file_has_hash(resource_path, metadata.hash)
+
+          result = @gateway.resource(mob_id, metadata)
+          next if result.error?
+          resource = result.ok.not_nil!
+
           @log.debug { "updating resource id: #{resource.id} to #{resource_path} in #{resource_dirname} of programmer #{programmer_id}" }
-
           FileUtils.mkdir_p(resource_dirname)
-
-          next if is_same_file(resource_path, resource)
-
           File.open(resource_path, "w") do |f|
             IO.copy(resource.content, f)
           end
@@ -74,8 +78,8 @@ module Bobo
         Gateway::Hasher.hash(path)
       end
 
-      private def is_same_file(path : ::Path | String, resource : Resource) : Bool
-        File.exists?(path) && Gateway::Hasher.file_hash(Path[path]) == resource.hash
+      private def file_has_hash(path : ::Path | String, hash : String) : Bool
+        File.exists?(path) && Gateway::Hasher.file_hash(Path[path]) == hash
       end
     end
   end
