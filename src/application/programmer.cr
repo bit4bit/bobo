@@ -21,7 +21,7 @@ module Bobo
           # mismo hash omitimos sincronizacion
           next if file_has_hash(resource_path, metadata.hash)
 
-          result = @gateway.resource(mob_id, metadata)
+          result = @gateway.resource(mob_id, metadata.id)
           next if result.error?
           resource = result.ok.not_nil!
 

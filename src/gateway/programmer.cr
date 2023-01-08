@@ -16,35 +16,30 @@ module Bobo
         Bobo::Programmer.new(id)
       end
 
-      def resource(mob_id : String, metadata : Bobo::Gateway::ResourceMetadata) : Bobo::Result
+      def resource(mob_id : String, resource_id : String) : Bobo::Result
           url = "#{@mob_url}/#{mob_id}/resource"
-          resp = @protocol.read(url, headers: {"resource_id" => metadata.id})
+          resp = @protocol.read(url, headers: {"resource_id" => resource_id})
           if resp.status_code != 200
-            return Result.error("errors getting resource #{metadata.id}: #{resp.body}")
+            return Result.error("errors getting resource #{resource_id}: #{resp.body}")
           end
 
+          metadata = nil
           content = IO::Memory.new()
           resource_data = IO::Memory.new(resp.body)
           HTTP::FormData.parse(resource_data, "boundary") do |part|
             case part.name
-            when "programmer_id"
-              programmer_id = part.body.gets_to_end
-            when "relative_path"
-              relative_path = part.body.gets_to_end
-            when "id"
-              resource_id = part.body.gets_to_end
-            when "hash"
-              hash = part.body.gets_to_end
+            when "metadata"
+              metadata = Bobo::Gateway::ResourceMetadata.from_wire(part.body.gets_to_end)
             when "content"
               IO.copy(part.body, content)
             end
           end
 
           r = Bobo::Resource.new(
-            id: metadata.id,
-            programmer_id: metadata.programmer_id,
-            relative_path: Path[metadata.relative_path],
-            hash: metadata.hash,
+            id: metadata.not_nil!.id,
+            programmer_id: metadata.not_nil!.programmer_id,
+            relative_path: Path[metadata.not_nil!.relative_path],
+            hash: metadata.not_nil!.hash,
             content: content)
           Result.ok(r)
       end

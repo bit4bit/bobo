@@ -52,11 +52,9 @@ get "/:mob_id/resource" do |env|
   mob = gateway.get(mob_id)
   resource = mob.resource(resource_id).not_nil!
 
+  metadata = Bobo::Gateway::ResourceMetadata.from_resource(resource)
   HTTP::FormData.build(env.response, "boundary") do |builder|
-    builder.field("id", resource.id)
-    builder.field("programmer_id", resource.programmer_id)
-    builder.field("hash", resource.hash)
-    builder.field("relative_path", resource.relative_path)
+    builder.field("metadata", metadata.to_wire())
     builder.file("content", resource.content)
   end
   env.response.close
