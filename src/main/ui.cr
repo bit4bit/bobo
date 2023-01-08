@@ -15,8 +15,8 @@ class UI
     directory = env.params.query.fetch("directory", nil) || env.params.body.fetch("directory", nil) || env.params.query.fetch("directory", nil)
     up_directory = @mob_directory
     up_directory = Path[directory].parent.relative_to(@mob_directory).normalize.to_s if !directory.nil?
-    directory = @mob_directory if [".", ".."].includes?(directory)
-    directory ||= @mob_directory
+    directory = "" if [".", ".."].includes?(directory)
+    directory ||= ""
 
     workspace = Path[@mob_directory].join(directory)
     names = Dir.children(workspace).map do |name|
