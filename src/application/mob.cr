@@ -15,7 +15,15 @@ module Bobo
 
         mob = @gateway.get(mob_id)
         programmer = @gateway.get_programmer(resource.programmer_id)
-        result = mob.drive(programmer, resource)
+
+        mob.drive(programmer, resource)
+      end
+
+      def handover(mob_id : String, programmer_id : String, resource_id : String) : Bobo::Result
+        mob = @gateway.get(mob_id)
+        programmer = @gateway.get_programmer(programmer_id)
+
+        mob.handover(programmer, resource_id)
       end
     end
   end

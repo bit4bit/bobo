@@ -87,10 +87,7 @@ post "/:mob_id/drive/delete" do |env|
   programmer_id = env.params.body["programmer_id"].not_nil!
   resource_id = env.params.body["id"].not_nil!
 
-  mob = gateway.get(mob_id)
-  programmer = gateway.get_programmer(programmer_id)
-
-  result = mob.handover(programmer, resource_id)
+  result = app.handover(mob_id, programmer_id, resource_id)
   if result.error?
     halt env, status_code: 403, response: result.error
   else
