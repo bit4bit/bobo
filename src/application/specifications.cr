@@ -1,43 +1,21 @@
 module Bobo::Application
-  class Specifications::AllowedContentSize < Specification(Bobo::Resource)
-    def initialize(@max_size : Int32)
-    end
-
-    def isSatisfiedBy(expr): Bobo::Result
-      if expr.content.bytesize > @max_size
-        Bobo::Result.error("overflow max size")
-      else
-        Bobo::Result.ok(expr)
-      end
-    end
-  end
-
   # Reglas que deben cumplir los recursos
-  class ResourceSpecification < Specification(Bobo::Resource)
+  class ResourceConstraints
+    setter :allowed_content_size
+
     def initialize
-      @specifications = [] of Specification(Bobo::Resource)
+      @allowed_content_size = 1024 * 300
     end
 
-    def allowed_content_size=(max_size : Int32)
-      @specifications << Specifications::AllowedContentSize.new(max_size)
-    end
-
-    def isSatisfiedBy(expr : Bobo::Resource) : Bobo::Result
-      @specifications.each do |spec|
-        result = spec.isSatisfiedBy(expr)
-        return result if result.error?
+    def verify(resource : Bobo::Resource) : Bobo::Result
+      if resource.content.bytesize > @allowed_content_size
+        Result.error("overflow max size")
+      else
+        Result.ok(resource)
       end
-      Result.ok(expr)
-    end
-    def isSatisfiedBy(expr : IO::Memory) : Bobo::Result
-      @specifications.each do |spec|
-        result = spec.isSatisfiedBy(expr)
-        return result if result.error?
-      end
-      Result.ok(expr)
     end
 
-    def self.specification
+    def self.constraints
       spec = new()
       yield spec
       spec

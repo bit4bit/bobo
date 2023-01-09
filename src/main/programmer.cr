@@ -72,13 +72,13 @@ gateway = Bobo::Gateway::Programmer.new(mob_url.not_nil!,
                                         log,
                                         mob_directory,
                                         protocol: protocol)
-resource_spec = Bobo::Application::ResourceSpecification.specification do |spec|
-  spec.allowed_content_size = max_resource_content_size
+resource_constraints = Bobo::Application::ResourceConstraints.constraints do |constraints|
+  constraints.allowed_content_size = max_resource_content_size
 end
 pgapp = Bobo::Application::Programmer.new(
   gateway: gateway,
   log: Log.for("programmer:application"),
-  resource_specification: resource_spec,
+  resource_constraints: resource_constraints,
   mob_directory: mob_directory
 )
 

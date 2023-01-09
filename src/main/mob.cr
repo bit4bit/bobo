@@ -44,11 +44,11 @@ if quiet
 end
 
 log = Log.for("mob")
-resource_spec = Bobo::Application::ResourceSpecification.specification do |spec|
-  spec.allowed_content_size = max_resource_content_size
+resource_constraints = Bobo::Application::ResourceConstraints.constraints do |constraints|
+  constraints.allowed_content_size = max_resource_content_size
 end
 gateway = Bobo::Gateway::Mob.new()
-app = Bobo::Application::Mob.new(gateway, resource_spec)
+app = Bobo::Application::Mob.new(gateway, resource_constraints)
 
 get "/:mob_id/resource" do |env|
   mob_id = env.params.url["mob_id"].not_nil!

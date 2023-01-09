@@ -2,7 +2,7 @@ module Bobo
   module Application
     class Mob
       def initialize(@gateway : Gateway::Mob,
-                     @resource_specification : Bobo::Application::ResourceSpecification)
+                     @resource_constraints : Bobo::Application::ResourceConstraints)
       end
 
       def get_id
@@ -10,7 +10,7 @@ module Bobo
       end
 
       def drive(mob_id : String, resource : Resource) : Bobo::Result
-        result = @resource_specification.isSatisfiedBy(resource)
+        result = @resource_constraints.verify(resource)
         return result if result.error?
 
         mob = @gateway.get(mob_id)

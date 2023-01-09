@@ -6,7 +6,7 @@ module Bobo
     class Programmer
       def initialize(@gateway : Gateway::Programmer,
                      @log : Log,
-                     @resource_specification : ResourceSpecification,
+                     @resource_constraints : ResourceConstraints,
                      mob_directory : String)
         @drives = Set(String).new()
 
@@ -66,7 +66,7 @@ module Bobo
           hash: hash,
           path: local_path,
           relative_path: path)
-        result = @resource_specification.isSatisfiedBy(resource)
+        result = @resource_constraints.verify(resource)
         return result if result.error?
 
         result = @gateway.drive(mob_id, resource)
