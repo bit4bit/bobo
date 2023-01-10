@@ -1,3 +1,5 @@
+require "./programmer/event_provider"
+
 module Bobo
   module Gateway
     class Programmer

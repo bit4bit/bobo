@@ -2,6 +2,8 @@ module Bobo
   alias Resources = Array(Resource)
 
   class Resource
+    getter :metadata
+
     def initialize(
          id : String,
          relative_path : Bobo::Path,

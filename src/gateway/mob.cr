@@ -1,3 +1,5 @@
+require "./mob/event_provider"
+
 module Bobo
   module Gateway
     class Mob

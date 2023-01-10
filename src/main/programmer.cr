@@ -67,6 +67,10 @@ if tor_connect
   http_tunnel_port = Bobo::Tor::Config.ephemeral_port()
 end
 
+event_provider = Bobo::Gateway::ProgrammerEventProvider.new(
+  mob_url.not_nil!,
+  mob_id.not_nil!,
+  sslctx)
 protocol = Bobo::Gateway::Protocol.new(sslctx, http_tunnel_port)
 gateway = Bobo::Gateway::Programmer.new(mob_url.not_nil!,
                                         log,
@@ -110,6 +114,18 @@ post "/drive" do |env|
   end
 end
 
+# EVENTS
+event_provider.on_event do |tag, event|
+  case event
+  when Bobo::Application::Events::ResourceDrived
+    pgapp.copiloting_resource(
+      mob_id.not_nil!,
+      event.metadata
+    )
+  end
+end
+
+
 # UI
 require "./ui"
 programmer_url = "http://localhost:#{http_port}"
@@ -137,6 +153,10 @@ end
 
 post "/ui/action/handover" do |env|
   ui.action_handover(env)
+end
+
+spawn name: "event-provider" do
+  event_provider.run
 end
 
 spawn do

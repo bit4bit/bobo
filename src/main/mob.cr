@@ -47,8 +47,12 @@ log = Log.for("mob")
 resource_constraints = Bobo::Application::ResourceConstraints.constraints do |constraints|
   constraints.allowed_content_size = max_resource_content_size
 end
+event_provider = Bobo::Gateway::MobEventProvider.new()
 gateway = Bobo::Gateway::Mob.new()
-app = Bobo::Application::Mob.new(gateway, resource_constraints)
+app = Bobo::Application::Mob.new(
+  gateway,
+  resource_constraints: resource_constraints,
+  event_provider: event_provider)
 
 get "/:mob_id/resource" do |env|
   mob_id = env.params.url["mob_id"].not_nil!
@@ -120,6 +124,12 @@ post "/:mob_id/drive" do |env|
     env.response.status_code = 200
     "ok"
   end
+end
+
+ws "/:mob_id/events" do |socket, context|
+  mob_id = context.ws_route_lookup.params["mob_id"]
+
+  event_provider.subscribe_websocket(mob_id, socket)
 end
 
 if !quiet

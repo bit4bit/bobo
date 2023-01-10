@@ -13,25 +13,31 @@ module Bobo
         @mob_directory = Path[::Path[mob_directory].expand]
       end
 
+      def copiloting_resource(mob_id : String, metadata : Bobo::ResourceMetadata) : Bobo::Result
+        resource_path = @mob_directory.join(metadata.relative_path).to_path
+        resource_dirname = ::Path[resource_path].dirname
+
+        # mismo hash omitimos sincronizacion
+        return Result.error("same file") if file_has_hash(resource_path, metadata.hash)
+
+        result = @gateway.resource(mob_id, metadata.id)
+        return result if result.error?
+        resource = result.ok.not_nil!
+
+        FileUtils.mkdir_p(resource_dirname)
+        File.open(resource_path, "w") do |f|
+          IO.copy(resource.content, f)
+        end
+        @log.debug { "updated resource id: #{resource.id}" }
+
+        Result.ok(resource)
+      end
+
       def copiloting(mob_id : String, programmer_id : String)
         resources_metadata = @gateway.resources_of_copilot(mob_id, programmer_id)
         resources_metadata.each do |metadata|
-          resource_path = @mob_directory.join(metadata.relative_path).to_path
-          resource_dirname = ::Path[resource_path].dirname
-
-          # mismo hash omitimos sincronizacion
-          next if file_has_hash(resource_path, metadata.hash)
-
-          result = @gateway.resource(mob_id, metadata.id)
+          result = copiloting_resource(mob_id, metadata)
           next if result.error?
-          resource = result.ok.not_nil!
-
-          @log.debug { "updating resource id: #{resource.id} to #{resource_path} in #{resource_dirname} of programmer #{programmer_id}" }
-          FileUtils.mkdir_p(resource_dirname)
-          File.open(resource_path, "w") do |f|
-            IO.copy(resource.content, f)
-          end
-          @log.debug { "updated resource id: #{resource.id}" }
         end
       end
 
