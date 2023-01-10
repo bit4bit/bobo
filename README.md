@@ -2,23 +2,18 @@
 
 TODO: Write a description here
 
-## flujo
-
-* como programador x inicio un mob sobre el directorio
-* como programador foo cuando me conecto al mob se sincronizan los archivos actualmente dirigidos
-* como programador bar cuando me conecto al mob se sincronizan los archivos actualmente dirigidos
-* como programador foo cuando notifico que voy a conducir el trabajo sobre un archivo entonces
-  si el archivo a dirigir no ha sido dirigido y esta en el host del programador entonces deben tener el mismo hash
-* como programador bar espero que se refresquen los archivos locales que se esten dirigiendo
-* como programador foo notifico pasar la conduccion del archivo
-
 ## Installation
 
 TODO: Write installation instructions here
 
 ## Usage
 
-TODO: Write usage instructions here
+1. `rake prod`
+2. start mob
+ 1. `bash scripts/ssl_self.sh <my domain>`
+ 1. `./bin/bobo-mob -p 9691`
+3. start programmer
+ 1. `./bin/bobo-programmer -i <MOB ID> -u <PROGRAMMIR ID> -l https://<BOBO DOMAIN>:9691`
 
 ## Development
 
