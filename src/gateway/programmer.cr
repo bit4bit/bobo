@@ -2,7 +2,7 @@ module Bobo
   module Gateway
     class Programmer
       alias Resources = Array(Bobo::Resource)
-      alias ResourcesMetadata = Array(Bobo::Gateway::ResourceMetadata)
+      alias ResourcesMetadata = Array(Bobo::ResourceMetadata)
       getter :id
 
       def initialize(@mob_url : String,
@@ -29,7 +29,7 @@ module Bobo
           HTTP::FormData.parse(resource_data, "boundary") do |part|
             case part.name
             when "metadata"
-              metadata = Bobo::Gateway::ResourceMetadata.from_wire(part.body.gets_to_end)
+              metadata = Bobo::ResourceMetadata.from_wire(part.body.gets_to_end)
             when "content"
               IO.copy(part.body, content)
             end
@@ -55,7 +55,7 @@ module Bobo
         end
 
         resp.body.lines.each do |metadata_raw|
-          metadata = Bobo::Gateway::ResourceMetadata.from_wire(metadata_raw)
+          metadata = Bobo::ResourceMetadata.from_wire(metadata_raw)
           next if metadata.id == ""
           resources << metadata
         end

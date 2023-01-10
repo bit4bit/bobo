@@ -57,7 +57,7 @@ get "/:mob_id/resource" do |env|
   mob = gateway.get(mob_id)
   resource = mob.resource(resource_id).not_nil!
 
-  metadata = Bobo::Gateway::ResourceMetadata.from_resource(resource)
+  metadata = Bobo::ResourceMetadata.from_resource(resource)
   HTTP::FormData.build(env.response, "boundary") do |builder|
     builder.field("metadata", metadata.to_wire())
     builder.file("content", resource.content)
@@ -76,7 +76,7 @@ get "/:mob_id/:programmer_id/resources" do |env|
 
   index = ""
   resources.each do |resource|
-    metadata =  Bobo::Gateway::ResourceMetadata.from_resource(resource)
+    metadata =  Bobo::ResourceMetadata.from_resource(resource)
     index += metadata.to_wire + "\n"
   end
   index
