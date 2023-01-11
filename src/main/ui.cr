@@ -55,7 +55,7 @@ class UI
     filepath = env.params.body["filepath"].as(String)
 
     begin
-      resp = Crest.post("#{@programmer_url}/drive/delete", {"filepath" => filepath})
+      resp = Crest.post("#{@programmer_url}/handover", {"filepath" => filepath})
       if resp.status_code == 200
         @drives.delete(filepath)
       end

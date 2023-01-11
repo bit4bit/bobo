@@ -91,7 +91,7 @@ get "/mobid" do
 end
 
 # MACHETE: delete /drive not works
-post "/drive/delete" do |env|
+post "/handover" do |env|
   filepath = env.params.body["filepath"].as(String)
 
   result = pgapp.handover(mob_id.not_nil!, programmer_id.not_nil!, filepath)

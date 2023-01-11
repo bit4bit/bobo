@@ -1,4 +1,4 @@
-require "./gateway/response"
+require "./gateway/event"
 require "./gateway/programmer"
 require "./gateway/mob"
 require "./gateway/hasher"

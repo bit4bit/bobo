@@ -75,7 +75,7 @@ class Programmer
   end
 
   def release(file)
-    res = RestClient.post("http://localhost:#{@port}/drive/delete",
+    res = RestClient.post("http://localhost:#{@port}/handover",
                           {"filepath" => file})
 
     if res.code.to_i == 200
