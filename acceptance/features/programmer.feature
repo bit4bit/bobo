@@ -1,74 +1,43 @@
 Feature: As Programmer
-  Scenario: connect to active mob
-    Given example source code as "mycode"
-    And I inside "mycode"
-    When I start mob
-    Then I connect to mob started
+  I want to do mob programming
+  So we can learn about the domain
 
-  Scenario: drive a file
-    Given example source code as "example-mob"
-    And example source code as "example-user"
-    And I inside "example-user"
+  Background:
+    Given the source code
     When I start mob
-    Then I connect to mob started
-    And I drive file "example.rb"
-    Then drive ok
+    When I connect to mob started
+    
+  Scenario: Drive a file
+    When I drive a file
+    Then I can see the drived file
 
-  Scenario: drive a file it's always in the project
-    Given example source code as "example-mob"
-    And example source code as "example-user"
-    And I inside "example-user"
-    When I start mob
-    Then I connect to mob started
-    And I drive file "/example.rb"
-    Then drive ok
+  Scenario: The files I drive using absolute path
+    always are relative to source code 
+    When I drive a file using absolute path 
+    Then I can see the drived file using absolute path
 
-  Scenario: release a drived file
-    Given example source code as "example-mob"
-    And example source code as "example-user"
-    And I inside "example-user"
-    When I start mob
-    Then I connect to mob started
-    And I drive file "example.rb"
-    Then drive ok
-    Then I release file "example.rb"
-    Then ok
+  Scenario: Handover on the drived file
+    When I drive a file
+    And I handover the file
+    Then I can't see the drived file
 
-  Scenario: can't drive file of other programmer
-    Given example source code as "example-mob"
-    And example source code as "example-user"
-    And I inside "example-user"
-    When I start mob
-    Then I connect to mob started
-    And connect partner "partner" in "example-user"
-    And partner "partner" drive file "example.rb"
-    And I drive file "example.rb"
+  Scenario: Can't drive a drived file of other programmer
+    Given a partner
+    And the partner drive a file
+    When I drive a file
     Then fails with message "other programmer it's driving the resource"
 
-  Scenario: can't release a drive of other programmer
-    Given example source code as "mycode"
-    And example source code as "example-user"
-    And I inside "mycode"
-    When I start mob
-    Then I connect to mob started
-    And connect partner "partner" in "example-user"
-    And partner "partner" drive file "example.rb"
-    And I release file "example.rb"
+  Scenario: Only can handover my drives files
+    Given a partner
+    And the partner drive a file
+    When I handover the file
     Then fails with message "programmer it's not driving the resource"
 
-  Scenario: can't drive a file out of project
-    Given example source code as "example-mob"
-    And example source code as "example-user"
-    And I inside "example-user"
-    When I start mob
-    Then I connect to mob started
-    And I drive file "../example-user/example.rb"
+  Scenario: Only can drive file inside of project
+    out of the source code
+    When I try to drive a file out of project
     Then fails with message "invalid path"
 
-  Scenario: can't drive a file if overflow max file size
-    Given example source code as "mycode"
-    And I inside "mycode"
-    When I start mob
-    Then I connect to mob started with max-file-size 1 bytes
-    And I drive file "example.rb"
+  Scenario: Can only drive little files
+    When I drive a big file
     Then fails with message "overflow max size"

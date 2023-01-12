@@ -6,9 +6,10 @@ class UI
        @pggw : Bobo::Gateway::Programmer,
        @programmer_url : String,
        @mob_directory : String,
-       @log : Log
+       @log : Log,
+       @drives : Set(String)
      )
-    @drives = Set(String).new()
+
   end
 
   def browser(env)
@@ -40,9 +41,7 @@ class UI
 
     begin
       resp = Crest.post("#{@programmer_url}/drive", {"filepath" => filepath})
-      if resp.status_code == 200
-        @drives.add(filepath)
-      end
+
     rescue ex : Crest::RequestFailed
       @log.error { ex.message }
     end
@@ -56,9 +55,6 @@ class UI
 
     begin
       resp = Crest.post("#{@programmer_url}/handover", {"filepath" => filepath})
-      if resp.status_code == 200
-        @drives.delete(filepath)
-      end
     rescue ex : Crest::RequestFailed
       @log.error { ex.message }
     end

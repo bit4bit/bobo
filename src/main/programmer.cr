@@ -67,6 +67,7 @@ if tor_connect
   http_tunnel_port = Bobo::Tor::Config.ephemeral_port()
 end
 
+drives = Set(String).new()
 event_provider = Bobo::Gateway::ProgrammerEventProvider.new(
   mob_url.not_nil!,
   mob_id.not_nil!,
@@ -99,6 +100,7 @@ post "/handover" do |env|
   if result.error?
     halt env, status_code: 503, response: result.error
   else
+    drives.delete(filepath)
     result.ok
   end
 end
@@ -109,9 +111,14 @@ post "/drive" do |env|
   if result.error?
     halt env, status_code: 503, response: result.error
   else
+    drives.add(filepath)
     env.response.status_code = 200
     result.ok
   end
+end
+
+get "/drives" do |env|
+  drives.join("\n")
 end
 
 # EVENTS
@@ -136,7 +143,8 @@ ui = UI.new(
   pggw: gateway,
   programmer_url: programmer_url,
   mob_directory: mob_directory,
-  log: log
+  log: log,
+  drives: drives
 )
 
 get "/" do |env|
