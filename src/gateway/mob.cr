@@ -1,4 +1,4 @@
-require "./mob/event_provider"
+require "./mob/mob_notification"
 
 module Bobo
   module Gateway

@@ -2,15 +2,15 @@ require "./mob/events"
 
 module Bobo
   module Application
-    class MobEventProvider
-      def handle(mob_id : String, event : Events::ResourceDrived)
+    class MobNotification
+      def resourceDrived(mob_id : String, event : Bobo::Resource)
       end
     end
 
     class Mob
       def initialize(@gateway : Gateway::Mob,
                      @resource_constraints : Bobo::Application::ResourceConstraints,
-                     @event_provider = MobEventProvider.new())
+                     @notification = MobNotification.new())
       end
 
       def get_id
@@ -27,8 +27,7 @@ module Bobo
         result = mob.drive(programmer, resource)
 
         if result.ok?
-          event = Events::ResourceDrived.from(resource)
-          @event_provider.handle(mob_id, event)
+          @notification.resourceDrived(mob_id, resource)
         end
         result
       end
