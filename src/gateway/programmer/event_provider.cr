@@ -8,7 +8,10 @@ module Bobo::Gateway
     def initialize(@mob_url : String, @mob_id : String, @tls : OpenSSL::SSL::Context::Client)
       @handlers = Array(EventHandler).new()
       uri = URI.parse(@mob_url)
-      @ws = HTTP::WebSocket.new(uri.host.not_nil!, "/#{@mob_id}/events", uri.port.not_nil!, tls: @tls)
+      port = uri.port
+      port ||= 80
+      @ws = HTTP::WebSocket.new(uri.host.not_nil!, "/#{@mob_id}/events", port, tls: @tls)
+
       @ws.on_message do |msg|
         event = Bobo::Gateway::Event.from_wire(msg)
         @handlers.each do |handler|

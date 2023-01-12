@@ -68,10 +68,6 @@ if tor_connect
 end
 
 drives = Set(String).new()
-event_provider = Bobo::Gateway::ProgrammerEventProvider.new(
-  mob_url.not_nil!,
-  mob_id.not_nil!,
-  sslctx)
 protocol = Bobo::Gateway::Protocol.new(sslctx, http_tunnel_port)
 gateway = Bobo::Gateway::Programmer.new(mob_url.not_nil!,
                                         log,
@@ -122,16 +118,26 @@ get "/drives" do |env|
 end
 
 # EVENTS
-event_provider.on_event do |tag, event|
-  case event
-  when Bobo::Application::Events::ResourceDrived
-    pgapp.copiloting_resource(
-      mob_id.not_nil!,
-      event.metadata
-    )
+if tor_connect
+  log.warn { "disable websocket events not supported in tor" }
+else
+  event_provider = Bobo::Gateway::ProgrammerEventProvider.new(
+    mob_url.not_nil!,
+    mob_id.not_nil!,
+    sslctx)
+  event_provider.on_event do |tag, event|
+    case event
+    when Bobo::Application::Events::ResourceDrived
+      pgapp.copiloting_resource(
+        mob_id.not_nil!,
+        event.metadata
+      )
+    end
+  end
+  spawn name: "event-provider" do
+    event_provider.run
   end
 end
-
 
 # UI
 require "./ui"
@@ -163,9 +169,6 @@ post "/ui/action/handover" do |env|
   ui.action_handover(env)
 end
 
-spawn name: "event-provider" do
-  event_provider.run
-end
 
 spawn do
   loop do
