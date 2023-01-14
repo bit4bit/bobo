@@ -36,7 +36,7 @@ Feature: As Programmer
   Scenario: Only can drive file inside of project
     out of the source code
     When I try to drive a file out of project
-    Then fails with message "invalid path"
+    Then fails with message "not found file"
 
   Scenario: Can only drive little files
     When I drive a big file

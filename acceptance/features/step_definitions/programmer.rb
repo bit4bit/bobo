@@ -183,7 +183,7 @@ When('I drive a file using absolute path') do
 end
 
 When('I try to drive a file out of project') do
-  @result = @programmer.drive('../example-user/example.rb')
+  @result = @programmer.drive('../example.rb')
 end
 
 Then('I can see the drived file') do
