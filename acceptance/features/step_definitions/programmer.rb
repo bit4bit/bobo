@@ -41,7 +41,7 @@ class Mob
   end
 
   def start
-    @mob_pid = Process.spawn({"LOG_LEVEL" => "INFO"}, "#{$bin_path.join('bobo-mob')} test -d #{@mob_directory} -q --port #{@mob_http_port}")
+    @mob_pid = Process.spawn({"LOG_LEVEL" => "INFO"}, "#{$bin_path.join('bobo-mob')} test -d #{@mob_directory} -q -p #{@mob_http_port}")
   end
 
 
@@ -65,7 +65,7 @@ class Programmer
   end
 
   def start(mob_id)
-    args = "-i #{mob_id} -u #{@id} -d #{@mob_directory} -q --port #{@port} -l https://localhost:#{@mob_http_port} -t 1"
+    args = "-i #{mob_id} -u #{@id} -d #{@mob_directory} -q -p #{@port} -l https://localhost:#{@mob_http_port} -t 1"
     args += " --max-resource-content-size=#{@max_file_size}" if @max_file_size
     @mob_pid = Process.spawn({"LOG_LEVEL" => "INFO"}, "#{$bin_path.join('bobo-programmer')} #{args} ")
   end

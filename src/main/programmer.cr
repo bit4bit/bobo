@@ -58,16 +58,25 @@ raise "requires mob-url" if mob_url.nil?
 ssl_cert_path ||= "client.pem"
 abort "SSL Certificate Not Found at #{ssl_cert_path}" if !File.exists?(ssl_cert_path.not_nil!)
 
+drives = Set(String).new
 sslctx = OpenSSL::SSL::Context::Client.new
 sslctx.ca_certificates = ssl_cert_path.not_nil!
+protocol_proxy : Bobo::Gateway::ProtocolProxier = Bobo::Gateway::ProtocolProxy::HTTPSSLProxy.new(sslctx)
 
 http_tunnel_port = nil
 if tor_connect
   http_tunnel_port = Bobo::Tor::Config.ephemeral_port
+  protocol_proxy = Bobo::Gateway::ProtocolProxy::HTTPConnectProxy.new(
+    host: "127.0.0.1",
+    port: http_tunnel_port,
+    tls: sslctx
+  )
 end
 
-drives = Set(String).new
-protocol = Bobo::Gateway::Protocol.new(sslctx, http_tunnel_port)
+protocol = Bobo::Gateway::Protocol.new(
+  ssl: sslctx,
+  proxy: protocol_proxy
+)
 gateway = Bobo::Gateway::Programmer.new(mob_url.not_nil!,
   log,
   mob_directory,
