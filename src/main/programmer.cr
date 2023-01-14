@@ -24,13 +24,15 @@ mob_url = nil
 programmer_id = nil
 iteration_interval = 5
 http_port = 65300
+http_host = "127.0.0.1"
 max_resource_content_size = 1024 * 300 #300KB
 mob_directory = Dir.current
 
 OptionParser.parse do |parser|
   parser.banner = "usage: bobo programmer [arguments]"
   parser.on("-q", "--quiet", "QUIET") { |val| quiet = true }
-  parser.on("-p PORT", "--port=PORT", "HTTP PORT") { |port| http_port = port.to_i }
+  parser.on("-p PORT", "--http-port=PORT", "LISTENING HTTP PORT") { |port| http_port = port.to_i }
+  parser.on("--http-host=HOST", "LISTENING HTTP HOST") { |host| http_host = host}
   parser.on("-d DIRECTORY", "--mob-directory=DIRECTORY", "MOB DIRECTORY") { |path| mob_directory = path }
   parser.on("-i MOBID", "--mob-id=MOBID", "MOB ID") { |id| mob_id = id }
   parser.on("-u PROGRAMMERID", "--programmer-id=PROGRAMERID", "MOB ID") { |id| programmer_id = id }
@@ -196,5 +198,5 @@ if tor_connect
 end
 
 Kemal.run do |config|
-  config.server.not_nil!.bind_tcp http_port
+  config.server.not_nil!.bind_tcp "0.0.0.0", http_port
 end
