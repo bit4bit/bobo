@@ -10,7 +10,6 @@ module Bobo
     property programmer_id : String
     property hash : String
 
-
     def initialize(@id : String,
                    @relative_path : String,
                    @programmer_id : String,
@@ -19,9 +18,9 @@ module Bobo
 
     def self.from_resource(resource : Bobo::Resource)
       new(id: resource.id,
-          relative_path: resource.relative_path.to_path.to_s,
-          programmer_id: resource.programmer_id,
-          hash: resource.hash)
+        relative_path: resource.relative_path.to_path.to_s,
+        programmer_id: resource.programmer_id,
+        hash: resource.hash)
     end
 
     def initialize(@id : String,
@@ -35,7 +34,7 @@ module Bobo
     end
 
     def to_wire : String
-      self.to_json()
+      self.to_json
     end
   end
 end

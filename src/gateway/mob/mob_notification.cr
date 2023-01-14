@@ -8,9 +8,8 @@ module Bobo::Gateway
       @subscribers = {} of String => WebSockets
     end
 
-
     def resourceDrived(mob_id : String, resource : Bobo::Resource)
-      @subscribers[mob_id] ||= WebSockets.new()
+      @subscribers[mob_id] ||= WebSockets.new
       @subscribers[mob_id].each do |socket|
         next if socket.closed?
         event = Bobo::Gateway::Event.create(Bobo::Application::Events::ResourceDrived.from(resource))
@@ -19,7 +18,7 @@ module Bobo::Gateway
     end
 
     def subscribe_websocket(mob_id : String, websocket : HTTP::WebSocket)
-      @subscribers[mob_id] ||= WebSockets.new()
+      @subscribers[mob_id] ||= WebSockets.new
       @subscribers[mob_id] << websocket
     end
   end

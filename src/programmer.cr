@@ -1,5 +1,3 @@
-
-
 module Bobo
   class Programmer
     getter :id

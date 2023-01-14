@@ -9,13 +9,14 @@ module Bobo::Gateway
     end
 
     def to_wire : String
-      {"tag" => @tag,
+      {"tag"   => @tag,
        "event" => @event.to_wire}.to_json
     end
 
     def self.create(event : Bobo::Application::Events::ResourceDrived)
       new("resource-drived", event)
     end
+
     def self.from_wire(wire : String) : self
       data = Hash(String, String).from_json(wire)
       tag = data["tag"].not_nil!

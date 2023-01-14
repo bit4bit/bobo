@@ -1,15 +1,14 @@
 class UI
   def initialize(
-       @mob_id : String,
-       @programmer_id : String,
-       @pgapp : Bobo::Application::Programmer,
-       @pggw : Bobo::Gateway::Programmer,
-       @programmer_url : String,
-       @mob_directory : String,
-       @log : Log,
-       @drives : Set(String)
-     )
-
+    @mob_id : String,
+    @programmer_id : String,
+    @pgapp : Bobo::Application::Programmer,
+    @pggw : Bobo::Gateway::Programmer,
+    @programmer_url : String,
+    @mob_directory : String,
+    @log : Log,
+    @drives : Set(String)
+  )
   end
 
   def browser(env)
@@ -28,7 +27,7 @@ class UI
       else
         {relname, :file}
       end
-    end.reject {|n| @drives.includes?(n[0]) }.sort_by { |n| n[0] }
+    end.reject { |n| @drives.includes?(n[0]) }.sort_by { |n| n[0] }
 
     copiloting_resources = @pggw.resources_of_copilot(@mob_id, @programmer_id)
 
@@ -41,7 +40,6 @@ class UI
 
     begin
       resp = Crest.post("#{@programmer_url}/drive", {"filepath" => filepath})
-
     rescue ex : Crest::RequestFailed
       @log.error { ex.message }
     end

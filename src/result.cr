@@ -1,6 +1,7 @@
 module Bobo
   class Result(Ok, Error)
     getter :ok
+
     def initialize(@error : Error = nil, @ok : Ok = nil)
     end
 

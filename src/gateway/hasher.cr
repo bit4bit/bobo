@@ -1,7 +1,7 @@
 module Bobo
   module Gateway
     class Hasher
-      def self.file_hash(path : Path | String): String
+      def self.file_hash(path : Path | String) : String
         digest = Digest::SHA256.new
         digest.file(path.to_path)
         digest.hexfinal

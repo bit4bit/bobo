@@ -11,10 +11,11 @@ module Bobo
       new(name)
     end
 
-    def join(part : self): Path
+    def join(part : self) : Path
       Bobo::Path.new(::Path[self.path].join(part.path))
     end
-    def join(part : String): Path
+
+    def join(part : String) : Path
       Bobo::Path.new(::Path[self.path].join(part))
     end
 

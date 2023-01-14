@@ -1,4 +1,3 @@
-
 require "http/server"
 require "option_parser"
 require "dir"
@@ -25,14 +24,14 @@ programmer_id = nil
 iteration_interval = 5
 http_port = 65300
 http_host = "127.0.0.1"
-max_resource_content_size = 1024 * 300 #300KB
+max_resource_content_size = 1024 * 300 # 300KB
 mob_directory = Dir.current
 
 OptionParser.parse do |parser|
   parser.banner = "usage: bobo programmer [arguments]"
   parser.on("-q", "--quiet", "QUIET") { |val| quiet = true }
   parser.on("-p PORT", "--http-port=PORT", "LISTENING HTTP PORT") { |port| http_port = port.to_i }
-  parser.on("--http-host=HOST", "LISTENING HTTP HOST") { |host| http_host = host}
+  parser.on("--http-host=HOST", "LISTENING HTTP HOST") { |host| http_host = host }
   parser.on("-d DIRECTORY", "--mob-directory=DIRECTORY", "MOB DIRECTORY") { |path| mob_directory = path }
   parser.on("-i MOBID", "--mob-id=MOBID", "MOB ID") { |id| mob_id = id }
   parser.on("-u PROGRAMMERID", "--programmer-id=PROGRAMERID", "MOB ID") { |id| programmer_id = id }
@@ -52,11 +51,9 @@ if quiet
   logging false
 end
 
-
 raise "requires mob-id" if mob_id.nil?
 raise "requires programmer-id" if programmer_id.nil?
 raise "requires mob-url" if mob_url.nil?
-
 
 ssl_cert_path ||= "client.pem"
 abort "SSL Certificate Not Found at #{ssl_cert_path}" if !File.exists?(ssl_cert_path.not_nil!)
@@ -66,15 +63,15 @@ sslctx.ca_certificates = ssl_cert_path.not_nil!
 
 http_tunnel_port = nil
 if tor_connect
-  http_tunnel_port = Bobo::Tor::Config.ephemeral_port()
+  http_tunnel_port = Bobo::Tor::Config.ephemeral_port
 end
 
-drives = Set(String).new()
+drives = Set(String).new
 protocol = Bobo::Gateway::Protocol.new(sslctx, http_tunnel_port)
 gateway = Bobo::Gateway::Programmer.new(mob_url.not_nil!,
-                                        log,
-                                        mob_directory,
-                                        protocol: protocol)
+  log,
+  mob_directory,
+  protocol: protocol)
 resource_constraints = Bobo::Application::ResourceConstraints.constraints do |constraints|
   constraints.allowed_content_size = max_resource_content_size
 end
@@ -170,7 +167,6 @@ end
 post "/ui/action/handover" do |env|
   ui.action_handover(env)
 end
-
 
 spawn do
   loop do

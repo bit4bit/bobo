@@ -6,8 +6,8 @@ module Bobo
       getter :mob_directory
 
       def initialize
-        @mobs = Hash(String, Bobo::Mob).new()
-        @programmers = Hash(String, Bobo::Programmer).new()
+        @mobs = Hash(String, Bobo::Mob).new
+        @programmers = Hash(String, Bobo::Programmer).new
       end
 
       def get_programmer(id : String) : Bobo::Programmer

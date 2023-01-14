@@ -1,10 +1,9 @@
-
 module Bobo
   class Mob
     getter :id
 
     def initialize(@id : String)
-      @resources = Hash(String, Resource).new()
+      @resources = Hash(String, Resource).new
     end
 
     def add_resource(resource : Resource)
@@ -27,7 +26,7 @@ module Bobo
         Result.error("resource not found")
       elsif resource.programmer_id == programmer.id
         @resources.delete(id)
-        Result.ok()
+        Result.ok
       else
         Result.error("programmer it's not driving the resource")
       end
@@ -37,9 +36,9 @@ module Bobo
       mob_resource = @resources.fetch(programmer_resource.id, nil)
 
       if mob_resource.nil?
-        Result.ok()
+        Result.ok
       elsif mob_resource.programmer_id == programmer.id
-        Result.ok()
+        Result.ok
       elsif mob_resource.programmer_id != programmer.id
         Result.error("other programmer it's driving the resource")
       else
@@ -53,7 +52,7 @@ module Bobo
 
       @resources[resource.id] = resource
 
-      Result.ok()
+      Result.ok
     end
   end
 end

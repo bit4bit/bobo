@@ -10,7 +10,7 @@ module Bobo
     class Mob
       def initialize(@gateway : Gateway::Mob,
                      @resource_constraints : Bobo::Application::ResourceConstraints,
-                     @notification = MobNotification.new())
+                     @notification = MobNotification.new)
       end
 
       def get_id

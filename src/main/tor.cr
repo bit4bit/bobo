@@ -22,7 +22,7 @@ module Bobo
       property :tor_alias
       property :retries
 
-      def create_torrc()
+      def create_torrc
         File.open(torrc_path.not_nil!, "w", perm: 0o700) do |f|
           if tor_onion
             f.puts "HiddenServiceDir #{tor_working_dir}"
@@ -34,7 +34,7 @@ module Bobo
         FileUtils.mkdir_p(tor_working_dir.not_nil!, mode: 0o700)
       end
 
-      def print_banner()
+      def print_banner
         if tor_onion
           hostname_path = File.join(tor_working_dir.not_nil!, "hostname")
           hostname = File.read(hostname_path)
@@ -48,15 +48,15 @@ module Bobo
         end
       end
 
-      def defaults()
+      def defaults
         self.torrc_path ||= File.join(Dir.tempdir, "bobo-#{self.tor_alias}-tor.torrc")
         self.tor_working_dir ||= File.join(Dir.tempdir, "bobo-#{self.tor_alias}-tor-working")
         self.tor_binary_path ||= Process.find_executable("tor")
-        self.socks_port ||= Config.ephemeral_port()
-        self.http_tunnel_port ||= Config.ephemeral_port()
+        self.socks_port ||= Config.ephemeral_port
+        self.http_tunnel_port ||= Config.ephemeral_port
       end
 
-      def self.ephemeral_port(): Int32
+      def self.ephemeral_port : Int32
         server = TCPServer.new("localhost", 0)
         port = server.local_address.port
         server.close
@@ -70,7 +70,7 @@ module Bobo
         config = Config.new
         yield config
 
-        config.defaults()
+        config.defaults
 
         srv = new(config)
         srv.start
@@ -83,8 +83,8 @@ module Bobo
       def start
         abort "not found tor binary please use --tor-binary-path" if !File.executable?(@config.tor_binary_path.not_nil!)
 
-        @config.create_torrc()
-        output = IO::Memory.new()
+        @config.create_torrc
+        output = IO::Memory.new
 
         @tor_process = Process.new(
           @config.tor_binary_path.not_nil!, ["-f", @config.torrc_path.not_nil!],
@@ -94,7 +94,7 @@ module Bobo
         )
 
         wait_tor_bootstrapped(output)
-        @config.print_banner()
+        @config.print_banner
       end
 
       def wait

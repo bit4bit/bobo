@@ -1,4 +1,3 @@
-
 module Bobo::Application::Events
   alias Event = ResourceDrived
 
@@ -6,7 +5,6 @@ module Bobo::Application::Events
     include JSON::Serializable
 
     property metadata : Bobo::ResourceMetadata
-
 
     def initialize(@metadata : Bobo::ResourceMetadata)
     end
@@ -20,7 +18,7 @@ module Bobo::Application::Events
     end
 
     def to_wire : String
-      @metadata.to_wire()
+      @metadata.to_wire
     end
   end
 end

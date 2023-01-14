@@ -11,7 +11,6 @@ module Bobo::Gateway
 
     def initialize(@ssl : OpenSSL::SSL::Context::Client,
                    @http_tunnel_port : Int32? = nil)
-
       if @http_tunnel_port
         @proxy = ConnectProxy.new("127.0.0.1", @http_tunnel_port.not_nil!)
       end
@@ -23,8 +22,8 @@ module Bobo::Gateway
         client = ConnectProxy::HTTPClient.new(uri, tls: @ssl)
         client.set_proxy(@proxy.not_nil!)
         Crest.post(url, form,
-                   http_client: client,
-                   logging: false).http_client_res
+          http_client: client,
+          logging: false).http_client_res
       else
         Crest.post(url, form, tls: @ssl, logging: false).http_client_res
       end
@@ -37,10 +36,10 @@ module Bobo::Gateway
         client.set_proxy(@proxy.not_nil!)
 
         Crest.get(url,
-                  headers: headers,
-                  logging: false,
-                  http_client: client
-                  ).http_client_res
+          headers: headers,
+          logging: false,
+          http_client: client
+        ).http_client_res
       else
         Crest.get(url, headers: headers, logging: false, tls: @ssl).http_client_res
       end

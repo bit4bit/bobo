@@ -8,7 +8,6 @@ require "kemal"
 
 require "../bobo"
 
-
 Log.setup_from_env
 
 ssl_key_path = nil
@@ -18,7 +17,7 @@ tor_binary_path = nil
 quiet = false
 command = nil
 http_port = 65300
-max_resource_content_size = 1024 * 300 #300KB
+max_resource_content_size = 1024 * 300 # 300KB
 mob_directory = Dir.current
 
 OptionParser.parse do |parser|
@@ -28,7 +27,7 @@ OptionParser.parse do |parser|
   parser.on("-d DIRECTORY", "--mob-directory=DIRECTORY", "MOB DIRECTORY") { |path| mob_directory = path }
   parser.on("--max-resource-content-size=BYTES", "max file size in bytes") { |i| max_resource_content_size = i.to_i }
   parser.on("--tor", "TOR ONION") { tor_onion = true }
-  parser.on("--tor-binary-path=PATH", "TOR BINARY PATH") { |path| tor_binary_path=path }
+  parser.on("--tor-binary-path=PATH", "TOR BINARY PATH") { |path| tor_binary_path = path }
   parser.on("--ssl-key-path=PATH", "SSL KEY PATH") { |path| ssl_key_path = path }
   parser.on("--ssl-cert-path=PATH", "SSL CERT PATH") { |path| ssl_cert_path = path }
   parser.on("-h", "--help", "Show this help") do
@@ -38,7 +37,6 @@ OptionParser.parse do |parser|
   end
 end.parse
 
-
 if quiet
   logging false
 end
@@ -47,8 +45,8 @@ log = Log.for("mob")
 resource_constraints = Bobo::Application::ResourceConstraints.constraints do |constraints|
   constraints.allowed_content_size = max_resource_content_size
 end
-notification = Bobo::Gateway::MobNotification.new()
-gateway = Bobo::Gateway::Mob.new()
+notification = Bobo::Gateway::MobNotification.new
+gateway = Bobo::Gateway::Mob.new
 app = Bobo::Application::Mob.new(
   gateway,
   resource_constraints: resource_constraints,
@@ -63,7 +61,7 @@ get "/:mob_id/resource" do |env|
 
   metadata = Bobo::ResourceMetadata.from_resource(resource)
   HTTP::FormData.build(env.response, "boundary") do |builder|
-    builder.field("metadata", metadata.to_wire())
+    builder.field("metadata", metadata.to_wire)
     builder.file("content", resource.content)
   end
   env.response.close
@@ -80,7 +78,7 @@ get "/:mob_id/:programmer_id/resources" do |env|
 
   index = ""
   resources.each do |resource|
-    metadata =  Bobo::ResourceMetadata.from_resource(resource)
+    metadata = Bobo::ResourceMetadata.from_resource(resource)
     index += metadata.to_wire + "\n"
   end
   index
@@ -135,7 +133,6 @@ end
 if !quiet
   puts "MOB directory #{mob_directory}"
 end
-
 
 require "./tor"
 if tor_onion

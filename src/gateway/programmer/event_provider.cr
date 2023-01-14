@@ -6,7 +6,7 @@ module Bobo::Gateway
     alias EventHandler = (String, Bobo::Application::Events::Event) -> Void
 
     def initialize(@mob_url : String, @mob_id : String, @tls : OpenSSL::SSL::Context::Client)
-      @handlers = Array(EventHandler).new()
+      @handlers = Array(EventHandler).new
       uri = URI.parse(@mob_url)
       port = uri.port
       port ||= 80

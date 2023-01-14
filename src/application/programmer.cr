@@ -8,7 +8,7 @@ module Bobo
                      @log : Log,
                      @resource_constraints : ResourceConstraints,
                      mob_directory : String)
-        @drives = Set(String).new()
+        @drives = Set(String).new
 
         @mob_directory = Path[::Path[mob_directory].expand]
       end
