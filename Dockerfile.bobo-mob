@@ -1,0 +1,19 @@
+FROM crystallang/crystal:1.7-alpine
+
+LABEL org.opencontainers.image.authors="Jovany Leandro G.C <bit4bit@riseup.net>"
+
+EXPOSE 80
+
+WORKDIR /app
+ADD shard.lock /app/
+ADD shard.yml /app/
+ADD src /app/src
+ADD bobo-mob.README.md /data/README.md
+
+RUN cd /app && shards build --production bobo-mob
+RUN cd /app && cp bin/bobo-mob /usr/bin/bobo-mob
+
+RUN rm -rf /app
+RUN mkdir -p /app
+
+ENTRYPOINT "/usr/bin/bobo-mob" -d /app -p 80 --ssl-key-path=/etc/bobo-mob.key --ssl-cert-path=/etc/bobo-mob.crt

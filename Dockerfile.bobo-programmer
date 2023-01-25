@@ -1,0 +1,19 @@
+FROM crystallang/crystal:1.7-alpine
+
+LABEL org.opencontainers.image.authors="Jovany Leandro G.C <bit4bit@riseup.net>"
+
+EXPOSE 80
+
+WORKDIR /app
+ADD shard.lock /app/
+ADD shard.yml /app/
+ADD src /app/src
+ADD bobo-programmer.README.md /data/README.md
+
+RUN cd /app && shards build --production bobo-programmer
+RUN cd /app && cp bin/bobo-programmer /usr/bin/bobo-programmer
+
+RUN rm -rf /app
+RUN mkdir -p /app
+
+ENTRYPOINT "/usr/bin/bobo-programmer" -d /app --http-host="0.0.0.0" -p 80 --ssl-cert-path=/etc/bobo-programmer.crt
