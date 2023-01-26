@@ -63,6 +63,7 @@ authorizer = Authorizer::Client.new(File.read(ssl_cert_path.not_nil!))
 drives = Set(String).new
 sslctx = OpenSSL::SSL::Context::Client.new
 sslctx.ca_certificates = ssl_cert_path.not_nil!
+sslctx.verify_mode = LibSSL::VerifyMode::PEER | LibSSL::VerifyMode::FAIL_IF_NO_PEER_CERT
 protocol_proxy : Bobo::Gateway::ProtocolProxier = Bobo::Gateway::ProtocolProxy::HTTPSSLProxy.new(sslctx)
 
 http_tunnel_port = nil
