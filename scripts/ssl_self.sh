@@ -9,7 +9,7 @@ set -ex
 cpwd=$(pwd)
 
 mkdir -p /tmp/bobo-ssl
-cp $cpwd/scripts/server_cert_ext.cnf /tmp/bobo-ssl
+cp $(dirname "$0")/server_cert_ext.cnf /tmp/bobo-ssl
 cd /tmp/bobo-ssl
 
 # TOMADO DE: https://www.golinuxcloud.com/golang-http/
@@ -30,5 +30,4 @@ cat cacert.pem >> certbundle.pem
 cp certbundle.pem $cpwd/server.pem
 cp certbundle.pem $cpwd/client.pem
 cp server.key $cpwd/server.key
-
 

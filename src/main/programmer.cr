@@ -8,6 +8,7 @@ require "kemal"
 
 require "../bobo"
 require "./tor"
+require "./auth"
 
 Log.setup_from_env
 
@@ -57,6 +58,7 @@ raise "requires mob-url" if mob_url.nil?
 
 ssl_cert_path ||= "client.pem"
 abort "SSL Certificate Not Found at #{ssl_cert_path}" if !File.exists?(ssl_cert_path.not_nil!)
+authorizer = Authorizer::Client.new(File.read(ssl_cert_path.not_nil!))
 
 drives = Set(String).new
 sslctx = OpenSSL::SSL::Context::Client.new
@@ -75,7 +77,8 @@ end
 
 protocol = Bobo::Gateway::Protocol.new(
   ssl: sslctx,
-  proxy: protocol_proxy
+  proxy: protocol_proxy,
+  x_auth: authorizer.authorization_token()
 )
 gateway = Bobo::Gateway::Programmer.new(mob_url.not_nil!,
   log,

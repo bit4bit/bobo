@@ -6,6 +6,7 @@ require "log"
 
 require "kemal"
 
+require "./auth"
 require "../bobo"
 
 Log.setup_from_env
@@ -37,6 +38,14 @@ OptionParser.parse do |parser|
   end
 end.parse
 
+ssl_key_path ||= "server.key"
+ssl_cert_path ||= "server.pem"
+abort "SSL Key Not Found" if !File.exists?(ssl_key_path.not_nil!)
+abort "SSL Certificate Not Found" if !File.exists?(ssl_cert_path.not_nil!)
+authorizer = Authorizer::Server.new(
+  File.read(ssl_key_path.not_nil!)
+)
+
 if quiet
   logging false
 end
@@ -51,6 +60,11 @@ app = Bobo::Application::Mob.new(
   gateway,
   resource_constraints: resource_constraints,
   notification: notification)
+
+before_all do |env|
+  x_auth = env.request.headers.fetch("X-AUTH", "")
+  halt env, status_code: 401, response: "Unauthorized" unless authorizer.authorized?(x_auth)
+end
 
 get "/:mob_id/resource" do |env|
   mob_id = env.params.url["mob_id"].not_nil!
@@ -148,12 +162,6 @@ if tor_onion
 end
 
 Kemal.run do |config|
-  ssl_key_path ||= "server.key"
-  ssl_cert_path ||= "server.pem"
-
-  abort "SSL Key Not Found" if !File.exists?(ssl_key_path.not_nil!)
-  abort "SSL Certificate Not Found" if !File.exists?(ssl_cert_path.not_nil!)
-
   sslctx = OpenSSL::SSL::Context::Server.new
   sslctx.certificate_chain = ssl_cert_path.not_nil!
   sslctx.private_key = ssl_key_path.not_nil!

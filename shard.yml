@@ -23,4 +23,6 @@ dependencies:
     github: 636f7374/herbal.cr
   connect-proxy:
     github: spider-gazelle/connect-proxy
+  openssl_ext:
+    github: toddsundsted/openssl_ext
 license: MIT
