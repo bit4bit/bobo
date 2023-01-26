@@ -16,4 +16,4 @@ RUN cd /app && cp bin/bobo-programmer /usr/bin/bobo-programmer
 RUN rm -rf /app
 RUN mkdir -p /app
 
-ENTRYPOINT "/usr/bin/bobo-programmer" -d /app --http-host="0.0.0.0" -p 80 --ssl-cert-path=/etc/bobo-programmer.crt
+ENTRYPOINT ["/usr/bin/bobo-programmer", "--http-host=\"0.0.0.0\"", "-p 80", "--ssl-cert-path=/etc/bobo-programmer.crt"]
