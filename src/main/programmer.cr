@@ -136,7 +136,8 @@ else
   event_provider = Bobo::Gateway::ProgrammerEventProvider.new(
     mob_url.not_nil!,
     mob_id.not_nil!,
-    sslctx)
+    sslctx,
+    x_auth: authorizer.authorization_token())
   event_provider.on_event do |tag, event|
     case event
     when Bobo::Application::Events::ResourceDrived

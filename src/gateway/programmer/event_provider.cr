@@ -5,7 +5,7 @@ module Bobo::Gateway
   class ProgrammerEventProvider
     alias EventHandler = (String, Bobo::Application::Events::Event) -> Void
 
-    def initialize(@mob_url : String, @mob_id : String, @tls : OpenSSL::SSL::Context::Client)
+    def initialize(@mob_url : String, @mob_id : String, @tls : OpenSSL::SSL::Context::Client, @x_auth : String)
       @handlers = Array(EventHandler).new
     end
 
@@ -18,15 +18,15 @@ module Bobo::Gateway
         uri = URI.parse(@mob_url)
         port = uri.port
         port ||= 80
-        ws = HTTP::WebSocket.new(uri.host.not_nil!, "/#{@mob_id}/events", port, tls: @tls)
-        
+        ws = HTTP::WebSocket.new(uri.host.not_nil!, "/#{@mob_id}/events", port, tls: @tls, headers: HTTP::Headers{"X-AUTH" => @x_auth})
+
         ws.on_message do |msg|
           event = Bobo::Gateway::Event.from_wire(msg)
           @handlers.each do |handler|
             handler.call(event.tag, event.event)
           end
         end
-        
+
         ws.run
       rescue ex : Exception
         STDERR.puts ex.inspect_with_backtrace

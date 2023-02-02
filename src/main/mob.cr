@@ -139,6 +139,9 @@ post "/:mob_id/drive" do |env|
 end
 
 ws "/:mob_id/events" do |socket, context|
+  x_auth = context.request.headers.fetch("X-AUTH", "")
+  halt context, status_code: 401, response: "Unauthorized" unless authorizer.authorized?(x_auth)
+
   mob_id = context.ws_route_lookup.params["mob_id"]
 
   notification.subscribe_websocket(mob_id, socket)
