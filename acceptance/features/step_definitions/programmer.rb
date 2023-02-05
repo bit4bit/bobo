@@ -113,8 +113,21 @@ class Programmer
     Result.new(e.response.body)
   end
 
+  def project_file(name)
+    File.join(@mob_directory, name)
+  end
+  private :project_file
+
+  def modification_time(name)
+    File.stat(project_file(name)).mtime
+  end
+  
+  def content(path)
+    File.read(project_file(path))
+  end
+
   def write_content(path, content)
-    File.write(File.join(@mob_directory, path), content)
+    File.write(project_file(path), content)
   end
 
   def stop
@@ -216,33 +229,6 @@ When('I start mob') do
   @mob.wait_started
 end
 
-Then('I can query mob ID') do
-  expect(@mob.id).to match(/^[0-9a-zA-Z]+$/)
-end
-
-Given('example source code as {string}') do |name|
-  tmpdir = Pathname.new(Dir.tmpdir)
-  path = tmpdir.join(name)
-  FileUtils.mkdir_p(path)
-
-  File.write(path.join('example.rb'), 'puts "hello"')
-  File.write(path.join('example.sh'), 'echo "hello"')
-
-  @projects_dir ||= {}
-  @projects_dir[name] = path
-end
-
-
-Given('I inside {string}') do |project|
-  @project_dir = @projects_dir.fetch(project)
-end
-
-Given('In {string} file {string} has content {string}') do |project, file, content|
-  dir = @projects_dir.fetch(project)
-  path = File.join(dir, file)
-  File.write(path, content)
-end
-
 Then('I connect to mob started') do
   @programmer = Programmer.new('test', @mob.mob_http_port, @project_dir)
   @programmer.start(@mob.id)
@@ -259,61 +245,24 @@ Then('I connect to mob started with max-file-size {int} bytes') do |size|
   expect(@programmer.mob_id).to eq(@mob.id)
 end
 
-Then('I drive file {string}') do |file|
-  @result = @programmer.drive(file)
+Then('I expect same content of drived partner file') do
+  sleep 2
+
+  file = 'example.rb'
+  expect(@programmer.content(file)).to eq(@partner.content(file))
 end
 
-Then('drive fails with error message {string}') do |msg|
-  expect(@result.error?).to be true
-  expect(@result.error).to eq(msg)
-end
+Then('I do not expect changes on the file') do
+  sleep 2
+  current_time = @programmer.modification_time('example.rb')
+  sleep 3
+  end_time = @programmer.modification_time('example.rb')
 
-Then('drive ok') do
-  if @result.error? != false
-    fail(@result.error)
-  end
-end
-
-
-Then('connect partner {string} in {string}') do |name, project|
-  project_dir = @projects_dir.fetch(project)
-  partner = Programmer.new(name, @mob.mob_http_port, project_dir)
-  partner.start(@mob.id)
-  partner.wait_started()
-
-  @partners ||= {}
-  @partners[name] = partner
-end
-
-Then('partner {string} drive file {string}') do |name, file|
-  partner = @partners.fetch(name)
-  result = partner.drive(file)
-  expect(result.error?).to be false
-end
-
-Then('I wait {int} second') do |int|
-  sleep int
-end
-
-Then('In {string} file {string} expects content {string}') do |project, file, content|
-  project_dir = @projects_dir.fetch(project)
-  Dir.chdir(project_dir) do |path|
-    filename = File.join(path, file)
-    fail("not file #{path} in project #{project}") unless File.exist?(filename)
-    got_content = File.read(filename)
-    
-    expect(got_content).to eq(content)
-  end
+  expect(end_time).to eq(current_time)
 end
 
 Then('I handover file {string}') do |file|
   @result = @programmer.handover(file)
-end
-
-Then('ok') do
-  if @result.error? != false
-    fail("expected ok")
-  end
 end
 
 Then('fails with message {string}') do |msg|
@@ -323,14 +272,3 @@ Then('fails with message {string}') do |msg|
 
   expect(@result.error).to eq(msg)
 end
-
-Then('I wait {int} seconds and in {string} file {string} is the same') do |wait, project, file|
-  project_dir = @projects_dir.fetch(project)
-  project_file = File.join(project_dir, file)
-  current_time = File.stat(project_file).mtime
-  sleep wait
-  end_time = File.stat(project_file).mtime
-
-  expect(end_time).to eq(current_time)
-end
-
