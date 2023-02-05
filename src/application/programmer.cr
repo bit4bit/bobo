@@ -19,6 +19,7 @@ module Bobo
 
         # mismo hash omitimos sincronizacion
         return Result.error("same file") if file_has_hash(resource_path, metadata.hash)
+        return Result.error("drived resource") if is_driving(metadata.relative_path)
 
         result = @gateway.resource(mob_id, metadata.id)
         return result if result.error?
@@ -80,6 +81,10 @@ module Bobo
         result
       rescue ex : Error
         Result.error(ex.message)
+      end
+
+      private def is_driving(relative_path : String) : Bool
+        @drives.includes?(relative_path)
       end
 
       private def resource_id(path : Path | String) : String

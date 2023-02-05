@@ -299,7 +299,7 @@ Then('In {string} file {string} expects content {string}') do |project, file, co
   project_dir = @projects_dir.fetch(project)
   Dir.chdir(project_dir) do |path|
     filename = File.join(path, file)
-    fail("not file #{path} in project #{project}") unless File.exists?(filename)
+    fail("not file #{path} in project #{project}") unless File.exist?(filename)
     got_content = File.read(filename)
     
     expect(got_content).to eq(content)
